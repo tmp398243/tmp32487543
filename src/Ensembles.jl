@@ -10,7 +10,7 @@ julia> greeting("Grant")
 
 ```
 """
-module PKGNAME
+module Ensembles
 
 include("pkg_stuff.jl")
 
@@ -28,4 +28,4 @@ else
     get_extension(mod, sym) = getfield(mod, sym)
 end
 
-end # module PKGNAME
+end # module Ensembles

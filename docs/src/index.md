@@ -1,27 +1,27 @@
 ```@meta
-CurrentModule = PKGNAME
+CurrentModule = Ensembles
 ```
 
-# PKGNAME
+# Ensembles
 
-Documentation for [PKGNAME](https://github.com/gbruer15/PKGNAME.jl).
+Documentation for [Ensembles](https://github.com/tmp398243/tmp32487543).
 
 
 ```@index
-Modules = [PKGNAME]
+Modules = [Ensembles]
 ```
 
 ```@autodocs
-Modules = [PKGNAME]
+Modules = [Ensembles]
 ```
 
 
 # Extensions
 
 ```@index
-Modules = [PKGNAME.get_extension(PKGNAME, :RandomExt)]
+Modules = [Ensembles.get_extension(Ensembles, :RandomExt)]
 ```
 
 ```@autodocs
-Modules = [PKGNAME.get_extension(PKGNAME, :RandomExt)]
+Modules = [Ensembles.get_extension(Ensembles, :RandomExt)]
 ```

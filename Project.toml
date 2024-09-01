@@ -1,5 +1,5 @@
-name = "PKGNAME"
-uuid = "00000000-0000-0000-0000-123456789010"
+name = "Ensembles"
+uuid = "6e62b0a0-f6e2-496f-914a-544f223f57d3"
 authors = ["Grant Bruer gbruer15@gmail.com and contributors"]
 version = "1.0.0-DEV"
 

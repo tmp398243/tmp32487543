@@ -1,14 +1,14 @@
-# PKGNAME
+# Ensembles
 
-| [**Documentation**][docs-latest-url]    | [<img src="https://img.shields.io/badge/docs-latest-blue.svg" alt = "doc badge" height="30">][docs-latest-url] [<img src="https://github.com/gbruer15/PKGNAME.jl/actions/workflows/docs.yaml/badge.svg?branch=main" alt = "doc badge" height="30">][docs-build-url] |
+| [**Documentation**][docs-latest-url]    | [<img src="https://img.shields.io/badge/docs-latest-blue.svg" alt = "doc badge" height="30">][docs-latest-url] [<img src="https://github.com/tmp398243/tmp32487543/actions/workflows/docs.yaml/badge.svg?branch=main" alt = "doc badge" height="30">][docs-build-url] |
 |----------------------|--------------------------------------------------|
-| [**CI tests**][ci-tests-url]        | [<img src="https://github.com/gbruer15/PKGNAME.jl/actions/workflows/ci-tests.yaml/badge.svg?branch=main" alt = "CI badge" height="30">][ci-tests-url] |
-| [**Code Coverage**][codecov-url]    | [<img src="https://gbruer15.github.io/PKGNAME.jl/coverage/badge.svg" alt = "coverage badge" height="30">][codecov-url] |
+| [**CI tests**][ci-tests-url]        | [<img src="https://github.com/tmp398243/tmp32487543/actions/workflows/ci-tests.yaml/badge.svg?branch=main" alt = "CI badge" height="30">][ci-tests-url] |
+| [**Code Coverage**][codecov-url]    | [<img src="https://tmp398243.github.io/tmp32487543/coverage/badge.svg" alt = "coverage badge" height="30">][codecov-url] |
 
-[docs-latest-url]: https://gbruer15.github.io/PKGNAME.jl
-[ci-tests-url]: https://github.com/gbruer15/PKGNAME.jl/actions/workflows/ci-tests.yaml?query=branch%3Amain
-[docs-build-url]: https://github.com/gbruer15/PKGNAME.jl/actions/workflows/docs.yaml?query=branch%3Amain
-[codecov-url]: https://gbruer15.github.io/PKGNAME.jl/coverage/
+[docs-latest-url]: https://tmp398243.github.io/tmp32487543
+[ci-tests-url]: https://github.com/tmp398243/tmp32487543/actions/workflows/ci-tests.yaml?query=branch%3Amain
+[docs-build-url]: https://github.com/tmp398243/tmp32487543/actions/workflows/docs.yaml?query=branch%3Amain
+[codecov-url]: https://tmp398243.github.io/tmp32487543/coverage/
 
 This package exists as a template for quickly getting a Julia package set up with continuous integration and documentation support. If you have suggestions for making this better, you are very welcome to make an issue or pull request to discuss it.
 
@@ -16,7 +16,7 @@ This package exists as a template for quickly getting a Julia package set up wit
 
 This repository follows a standard Julia project structure:
 
-- `src/`: Contains the main source code for the project with the entrypoint being `src/PKGNAME.jl`.
+- `src/`: Contains the main source code for the project with the entrypoint being `src/Ensembles.jl`.
 - `test/`: Includes test files for the project with the entrypoint being `test/runtests.jl`.
 - `docs/`: Houses documentation files.
 - `ci_scripts/`: Contains scripts used for continuous integration.

@@ -1,7 +1,7 @@
 using Pkg: Pkg
-using PKGNAME
+using Ensembles
 using Documenter
-using Random # Loads PKGNAME Random extension.
+using Random # Loads Ensembles Random extension.
 
 using Literate
 
@@ -89,30 +89,30 @@ for (ex, pth) in examples
 end
 
 # Set metadata for doctests.
-DocMeta.setdocmeta!(PKGNAME, :DocTestSetup, :(using PKGNAME, Test); recursive=true)
-if PKGNAME.HAS_NATIVE_EXTENSIONS
+DocMeta.setdocmeta!(Ensembles, :DocTestSetup, :(using Ensembles, Test); recursive=true)
+if Ensembles.HAS_NATIVE_EXTENSIONS
     using Random
     DocMeta.setdocmeta!(
-        PKGNAME.get_extension(PKGNAME, :RandomExt),
+        Ensembles.get_extension(Ensembles, :RandomExt),
         :DocTestSetup,
-        :(using PKGNAME, Test);
+        :(using Ensembles, Test);
         recursive=true,
     )
 end
 makedocs(;
-    modules=[PKGNAME, PKGNAME.get_extension(PKGNAME, :RandomExt)],
+    modules=[Ensembles, Ensembles.get_extension(Ensembles, :RandomExt)],
     authors="Grant Bruer gbruer15@gmail.com and contributors",
-    sitename="PKGNAME.jl",
+    sitename="Ensembles.jl",
     source=DOC_STAGE,
     build=DOC_BUILD,
     format=Documenter.HTML(;
-        repolink="https://github.com/gbruer15/PKGNAME.jl",
-        canonical="https://gbruer15.github.io/PKGNAME.jl",
+        repolink="https://github.com/tmp398243/tmp32487543",
+        canonical="https://tmp398243.github.io/tmp32487543",
         edit_link="main",
         assets=String[],
         size_threshold=2 * 2^20,
     ),
-    repo="github.com/gbruer15/PKGNAME.jl",
+    repo="github.com/tmp398243/tmp32487543",
     pages=[
         "Home" => "index.md",
         "Examples" => examples_markdown,

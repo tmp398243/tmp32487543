@@ -1,9 +1,9 @@
 # # Description
-# This example shows a simple use case for PKGNAME.
+# This example shows a simple use case for Ensembles.
 # Specifically, we use the [`greeting`](@ref) function to print greetings.
 #
 # First, we import the necessary packages.
-using PKGNAME
+using Ensembles
 
 # Then, we run the greeting function for different names, which are numeric in this case.
 names = rand(10)
