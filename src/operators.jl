@@ -8,7 +8,8 @@ abstract type AbstractOperator end
 abstract type AbstractNoisyOperator <: AbstractOperator end
 
 function (M::AbstractOperator)(
-        ensemble::T, args...; inplace = false) where {T <: AbstractEnsemble}
+    ensemble::T, args...; inplace=false
+) where {T<:AbstractEnsemble}
     if inplace
         return apply_operator!(M, ensemble, args...)
     end
@@ -16,13 +17,15 @@ function (M::AbstractOperator)(
 end
 
 function apply_operator(
-        M::AbstractOperator, ensemble::T, args...) where {T <: AbstractEnsemble}
+    M::AbstractOperator, ensemble::T, args...
+) where {T<:AbstractEnsemble}
     members = M.(get_ensemble_members(ensemble), args...)
     return T(ensemble, members)
 end
 
 function apply_operator!(
-        M::AbstractOperator, ensemble::T, args...) where {T <: AbstractEnsemble}
+    M::AbstractOperator, ensemble::T, args...
+) where {T<:AbstractEnsemble}
     # Note: does not change the state keys.
     for em in get_ensemble_members(ensemble)
         merge!(em, M(em, args...))
@@ -32,8 +35,8 @@ end
 
 function get_state_keys end
 
-function xor_seed!(M::T, seed_mod::UInt) where {T <: AbstractNoisyOperator}
-    error("Please implement this for type $T")
+function xor_seed!(M::T, seed_mod::UInt) where {T<:AbstractNoisyOperator}
+    return error("Please implement this for type $T")
 end
 
 split_clean_noisy(M::AbstractOperator, ensemble_obs::AbstractEnsemble) = ensemble_obs
@@ -51,17 +54,16 @@ function split_clean_noisy(M::AbstractNoisyOperator, ensemble_obs::AbstractEnsem
     return ensemble_clean, ensemble_noisy
 end
 
-function split_clean_noisy(M::T, member) where {T <: AbstractNoisyOperator}
-    error("Please implement this for type $T")
+function split_clean_noisy(M::T, member) where {T<:AbstractNoisyOperator}
+    return error("Please implement this for type $T")
 end
-
 
 struct KeyObserver <: AbstractOperator
     state_keys::Any
 end
 get_state_keys(M::KeyObserver) = M.state_keys
 
-function (M::KeyObserver)(member::Dict{Symbol, Any})
+function (M::KeyObserver)(member::Dict{Symbol,Any})
     obs = typeof(member)()
     for key in get_state_keys(M)
         obs[key] = deepcopy(member[key])

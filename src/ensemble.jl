@@ -70,8 +70,8 @@ julia> @test ensemble.state_keys == [:state];
 ```
 
 """
-struct Ensemble{K, V} <: AbstractEnsemble
-    members::Vector{Dict{K, V}}
+struct Ensemble{K,V} <: AbstractEnsemble
+    members::Vector{Dict{K,V}}
     state_keys::Vector{K}
     monolithic_storage::Bool
 end
@@ -97,7 +97,7 @@ function Base.show(io::IO, e::Ensemble)
     Base.show(io, e.state_keys)
     print(io, ", ")
     Base.show(io, e.monolithic_storage)
-    print(io, ")")
+    return print(io, ")")
 end
 
 """
@@ -135,9 +135,8 @@ function Base.show(io::IO, mime::MIME"text/plain", e::Ensemble)
         println(io, " []")
     else
         lines, columns = displaysize(io)
-        io = IOContext(io,
-            :typeinfo => eltype(e.members),
-            :displaysize => (max(lines - 5, 1), columns)
+        io = IOContext(
+            io, :typeinfo => eltype(e.members), :displaysize => (max(lines - 5, 1), columns)
         )
         println(io)
         Base.print_array(io, e.members)
@@ -148,7 +147,7 @@ function Base.show(io::IO, mime::MIME"text/plain", e::Ensemble)
     Base.show(io, e.state_keys)
     println(io)
     print(io, "monolithic_storage = ")
-    Base.show(io, mime, e.monolithic_storage)
+    return Base.show(io, mime, e.monolithic_storage)
 end
 
 # function Ensemble{K, V}(members::Vector{E}, state_keys::Vector{K};
@@ -156,17 +155,18 @@ end
 #     Ensemble{K, V}(members, state_keys, monolithic_storage)
 # end
 
-function Ensemble(members::Vector{E}, state_keys::Vector{K};
-        monolithic_storage = true) where {K, V, E <: Dict{K, V}}
-    Ensemble(members, state_keys, monolithic_storage)
+function Ensemble(
+    members::Vector{E}, state_keys::Vector{K}; monolithic_storage=true
+) where {K,V,E<:Dict{K,V}}
+    return Ensemble(members, state_keys, monolithic_storage)
 end
 
-function Ensemble(members::Vector{E}; kwargs...) where {K, V, E <: Dict{K, V}}
-    Ensemble(members, (sort ∘ collect ∘ keys)(members[1]); kwargs...)
+function Ensemble(members::Vector{E}; kwargs...) where {K,V,E<:Dict{K,V}}
+    return Ensemble(members, (sort ∘ collect ∘ keys)(members[1]); kwargs...)
 end
 
-function Ensemble(::Type{E}, state_keys::Vector{K}; kwargs...) where {K, V, E <: Dict{K, V}}
-    Ensemble(Vector{E}(), state_keys; kwargs...)
+function Ensemble(::Type{E}, state_keys::Vector{K}; kwargs...) where {K,V,E<:Dict{K,V}}
+    return Ensemble(Vector{E}(), state_keys; kwargs...)
 end
 
 """
@@ -190,13 +190,13 @@ julia> @test ensemble.state_keys == [:state];
 julia> @test ensemble.monolithic_storage == false;
 ```
 """
-Ensemble(ensemble::Ensemble, members::Vector, state_keys::Vector{Symbol}) = Ensemble(
-    members, state_keys; ensemble.monolithic_storage)
+Ensemble(ensemble::Ensemble, members::Vector, state_keys::Vector{Symbol}) =
+    Ensemble(members, state_keys; ensemble.monolithic_storage)
 
-function Ensemble{K, V}(
-        ensemble::Ensemble{K, V}, members::Vector, state_keys::Vector{Symbol}) where {K, V}
-    Ensemble(
-        members, state_keys; ensemble.monolithic_storage)
+function Ensemble{K,V}(
+    ensemble::Ensemble{K,V}, members::Vector, state_keys::Vector{Symbol}
+) where {K,V}
+    return Ensemble(members, state_keys; ensemble.monolithic_storage)
 end
 
 """
@@ -220,12 +220,11 @@ julia> @test ensemble.state_keys == [:i, :state];
 julia> @test ensemble.monolithic_storage == false;
 ```
 """
-Ensemble(ensemble::Ensemble, members::Vector) = Ensemble(
-    members; ensemble.monolithic_storage)
+Ensemble(ensemble::Ensemble, members::Vector) =
+    Ensemble(members; ensemble.monolithic_storage)
 
-function Ensemble{K, V}(ensemble::Ensemble{K, V}, members::Vector) where {K, V}
-    Ensemble(
-        members; ensemble.monolithic_storage)
+function Ensemble{K,V}(ensemble::Ensemble{K,V}, members::Vector) where {K,V}
+    return Ensemble(members; ensemble.monolithic_storage)
 end
 
 # Loop through each constructor and create a new constructor for Ensemble{K,V}
@@ -310,8 +309,8 @@ julia> @test e2.state_keys == [:i, :obs, :state];
 ```
 See also [`merge!`](@ref).
 """
-Base.merge(e::Ensemble, e1::Ensemble) = Ensemble(
-    merge.(e.members, e1.members); e.monolithic_storage)
+Base.merge(e::Ensemble, e1::Ensemble) =
+    Ensemble(merge.(e.members, e1.members); e.monolithic_storage)
 
 """
     get_ensemble_size(ensemble::Ensemble)
@@ -386,11 +385,11 @@ julia> get_member_vector(e, e.members[2])
 See also [`get_member_dict!`](@ref), [`get_ensemble_matrix`](@ref).
 """
 function get_member_vector(ensemble::Ensemble, member::Dict)
-    get_member_vector(ensemble.state_keys, member)
+    return get_member_vector(ensemble.state_keys, member)
 end
 
 function get_member_vector(state_keys::Vector, member::Dict)
-    reduce(vcat, _get_vector(member[key]) for key in state_keys)
+    return reduce(vcat, _get_vector(member[key]) for key in state_keys)
 end
 
 "Helper function for converting variety of types to a vector"
@@ -528,15 +527,11 @@ julia> get_ensemble_matrix(e)
 See also [`get_member_vector`](@ref), [`get_ensemble_dicts`](@ref).
 """
 function get_ensemble_matrix(ensemble::Ensemble)
-    get_ensemble_matrix(ensemble.state_keys, ensemble.members)
+    return get_ensemble_matrix(ensemble.state_keys, ensemble.members)
 end
 
 function get_ensemble_matrix(state_keys::Vector, members)
-    return reduce(
-        hcat,
-        get_member_vector(state_keys, member)
-        for member in members
-    )
+    return reduce(hcat, get_member_vector(state_keys, member) for member in members)
 end
 
 """
@@ -568,7 +563,7 @@ julia> @test get_member_vector(e, members2[2]) == data[:,2];
 
 See also [`get_member_dict!`](@ref), [`get_ensemble_matrix`](@ref).
 """
-function get_ensemble_dicts(ensemble::Ensemble, matrix::AbstractArray{T, 2}) where {T}
+function get_ensemble_dicts(ensemble::Ensemble, matrix::AbstractArray{T,2}) where {T}
     members = deepcopy(ensemble.members)
     for (i, (em, data)) in enumerate(zip(members, eachcol(matrix)))
         get_member_dict!(ensemble, em, data)
@@ -657,8 +652,9 @@ julia> @test merge.(e.members, e3.members) == loaded_members;
 See also [`load_ensemble_members`](@ref), [`load_ensemble`](@ref), [save_ensemble`](@ref),
 and [`move_ensemble`](@ref).
 """
-function save_ensemble_members(ensemble::Ensemble, folder_path;
-        existing_member_directory = nothing, existing_merge = false)
+function save_ensemble_members(
+    ensemble::Ensemble, folder_path; existing_member_directory=nothing, existing_merge=false
+)
     if !isnothing(existing_member_directory)
         if existing_merge
             mkpath(folder_path)
@@ -668,7 +664,7 @@ function save_ensemble_members(ensemble::Ensemble, folder_path;
                 merge!(em, em_new)
 
                 em_file_name = joinpath(folder_path, "$i.jld2")
-                jldsave(em_file_name; data = em)
+                jldsave(em_file_name; data=em)
                 rm(em_file_name_new)
             end
             try
@@ -683,10 +679,10 @@ function save_ensemble_members(ensemble::Ensemble, folder_path;
         mkpath(folder_path)
         for (i, em) in enumerate(ensemble.members)
             em_file_name = joinpath(folder_path, "$i.jld2")
-            jldsave(em_file_name; data = em)
+            jldsave(em_file_name; data=em)
         end
     end
-    return
+    return nothing
 end
 
 """
@@ -885,8 +881,13 @@ julia> @test e3.monolithic_storage == e2.monolithic_storage;
 See also [`save_ensemble_members`](@ref), [`load_ensemble_members`](@ref), [`load_ensemble`](@ref),
 and [`move_ensemble`](@ref).
 """
-function save_ensemble(ensemble::Ensemble, stem; existing_member_directory = nothing,
-        existing_merge = false, reset_state_keys = false)
+function save_ensemble(
+    ensemble::Ensemble,
+    stem;
+    existing_member_directory=nothing,
+    existing_merge=false,
+    reset_state_keys=false,
+)
     file_name = "$stem.jld2"
     if isfile(file_name)
         stem_new = "$(stem)-1"
@@ -897,7 +898,8 @@ function save_ensemble(ensemble::Ensemble, stem; existing_member_directory = not
         members = ensemble.members
         if !isnothing(existing_member_directory)
             members = load_ensemble_members(
-                existing_member_directory, get_ensemble_size(ensemble))
+                existing_member_directory, get_ensemble_size(ensemble)
+            )
             if existing_merge
                 for (em, em_new) in zip(ensemble.members, members)
                     merge!(em, em_new)
@@ -909,10 +911,10 @@ function save_ensemble(ensemble::Ensemble, stem; existing_member_directory = not
             end
         end
         data = (;
-            members = members,
-            state_keys = ensemble.state_keys,
-            monolithic_storage = ensemble.monolithic_storage,
-            version = "1.0.1"
+            members=members,
+            state_keys=ensemble.state_keys,
+            monolithic_storage=ensemble.monolithic_storage,
+            version="1.0.1",
         )
         jldsave(file_name; data...)
         if !isnothing(existing_member_directory)
@@ -926,16 +928,17 @@ function save_ensemble(ensemble::Ensemble, stem; existing_member_directory = not
                 @error "Error removing member directory $(existing_member_directory): $(e.msg)"
             end
         end
-        return
+        return nothing
     end
     save_ensemble_members(
-        ensemble, "$(stem)_ensemble"; existing_member_directory, existing_merge)
-    data = (;
-        state_keys = ensemble.state_keys,
-        monolithic_storage = ensemble.monolithic_storage,
-        version = "1.0.1"
+        ensemble, "$(stem)_ensemble"; existing_member_directory, existing_merge
     )
-    jldsave(file_name; data...)
+    data = (;
+        state_keys=ensemble.state_keys,
+        monolithic_storage=ensemble.monolithic_storage,
+        version="1.0.1",
+    )
+    return jldsave(file_name; data...)
 end
 
 """
@@ -964,15 +967,16 @@ function load_ensemble(stem)
             state_keys = load(file_name, "state_keys")
             folder_path = "$(stem)_ensemble"
             files = filter(f -> endswith(f, ".jld2"), readdir(folder_path))
-            numbers = [parse(Int, splitext(f)[1])
-                       for f in files if all(isdigit, splitext(f)[1])]
+            numbers = [
+                parse(Int, splitext(f)[1]) for f in files if all(isdigit, splitext(f)[1])
+            ]
             N = isempty(numbers) ? 0 : maximum(numbers)
             members = load_ensemble_members(folder_path, N)
         end
         ensemble = Ensemble(members, state_keys; monolithic_storage)
         return ensemble
     end
-    error("Invalid ensemble version: $version")
+    return error("Invalid ensemble version: $version")
 end
 
 """
@@ -1063,7 +1067,7 @@ function move_ensemble(stem, stem_new)
 
     version = load(file_name_new, "version")
     if version == "1.0.0"
-        return
+        return nothing
     end
     if version == "1.0.1"
         monolithic_storage = load(file_name_new, "monolithic_storage")
@@ -1072,7 +1076,7 @@ function move_ensemble(stem, stem_new)
             folder_path_new = "$(stem_new)_ensemble"
             mv(folder_path, folder_path_new)
         end
-        return
+        return nothing
     end
-    error("Invalid ensemble version: $version")
+    return error("Invalid ensemble version: $version")
 end

@@ -8,8 +8,13 @@ struct FileBasedPartial <: AbstractParallelStrategy
     work_path::Any
 end
 
-function run_partial_operator(strat::FileBasedPartial, worker::ParallelWorker,
-        operator, ensemble::AbstractEnsemble; reset_state_keys)
+function run_partial_operator(
+    strat::FileBasedPartial,
+    worker::ParallelWorker,
+    operator,
+    ensemble::AbstractEnsemble;
+    reset_state_keys,
+)
     if ispath(strat.target_path)
         error("Can't write to $(strat.target_path). It already exists")
     end
@@ -36,22 +41,26 @@ function run_partial_operator(strat::FileBasedPartial, worker::ParallelWorker,
         ## Skip if file already exists.
         filepath = joinpath(ensemble_dir, "$(i).jld2")
         if isfile(filepath)
-            return
+            return nothing
         end
 
         @debug "  - Doing ensemble member $(i)"
         em = operator(em0)
-        jldsave(filepath; data = em)
-        num_completed += 1
+        jldsave(filepath; data=em)
+        return num_completed += 1
     end
 
     ## Run transition function on each ensemble member for this worker.
-    asyncmap(wrapper, my_slice; ntasks = 4)
+    asyncmap(wrapper, my_slice; ntasks=4)
 
     if closer
         ## Save filter to target_path.
-        save_ensemble(ensemble, strat.target_path;
-            existing_member_directory = ensemble_dir, reset_state_keys)
+        save_ensemble(
+            ensemble,
+            strat.target_path;
+            existing_member_directory=ensemble_dir,
+            reset_state_keys,
+        )
     end
     return closer, num_completed
 end

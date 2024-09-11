@@ -1,6 +1,6 @@
 
 export NoisyObserver
-import Random
+using Random: Random
 
 struct NoisyObserver{O<:AbstractOperator} <: AbstractNoisyOperator
     op::O
@@ -28,15 +28,17 @@ function NoisyObserver(op::AbstractOperator; only_noisy=nothing, params)
     end
     state_keys = get_state_keys(op)
     if !only_noisy
-        state_keys = append!([Symbol(key, :_noisy) for key in get_state_keys(op)], state_keys)
+        state_keys = append!(
+            [Symbol(key, :_noisy) for key in get_state_keys(op)], state_keys
+        )
     end
-    
+
     return NoisyObserver(op, state_keys, noise_scale, rng, seed, only_noisy)
 end
 
 NoisyObserver(state_keys; params) = NoisyObserver(KeyObserver(state_keys); params)
 
-function (M::NoisyObserver)(member::Dict{Symbol, Any}, args...)
+function (M::NoisyObserver)(member::Dict{Symbol,Any}, args...)
     member = M.op(member, args...)
     obs = typeof(member)()
     for key in get_state_keys(M.op)
@@ -54,7 +56,7 @@ function (M::NoisyObserver)(member::Dict{Symbol, Any}, args...)
     return obs
 end
 
-function split_clean_noisy(M::NoisyObserver, obs::Dict{Symbol, Any})
+function split_clean_noisy(M::NoisyObserver, obs::Dict{Symbol,Any})
     obs_clean = typeof(obs)()
     obs_noisy = typeof(obs)()
     for key in get_state_keys(M.op)
