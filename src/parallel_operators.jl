@@ -1,14 +1,24 @@
-using Distributed: myid, remotecall, RemoteChannel, RemoteException, @everywhere, pmap,
-                   AbstractWorkerPool, default_worker_pool, @distributed, @sync, nworkers,
-                   workers, remotecall_wait
-import Random
+using Distributed:
+    myid,
+    remotecall,
+    RemoteChannel,
+    RemoteException,
+    @everywhere,
+    pmap,
+    AbstractWorkerPool,
+    default_worker_pool,
+    @distributed,
+    @sync,
+    nworkers,
+    workers,
+    remotecall_wait
+using Random: Random
 
 export DistributedOperator
 
 abstract type AbstractParallelOperator <: AbstractOperator end
 
-struct DistributedOperator{
-    T <: AbstractOperator, W <: AbstractWorkerPool, K <: AbstractDict, D} <:
+struct DistributedOperator{T<:AbstractOperator,W<:AbstractWorkerPool,K<:AbstractDict,D} <:
        AbstractParallelOperator
     op::T
     worker_pool::W
@@ -16,23 +26,28 @@ struct DistributedOperator{
     distributed_type::Val{D}
 end
 
-function DistributedOperator(op::T, worker_pool::W = default_worker_pool(),
-        distributed_type::Val = Val(:asyncmap);
-        kwargs...) where {T <: AbstractOperator, W <: AbstractWorkerPool}
+function DistributedOperator(
+    op::T,
+    worker_pool::W=default_worker_pool(),
+    distributed_type::Val=Val(:asyncmap);
+    kwargs...,
+) where {T<:AbstractOperator,W<:AbstractWorkerPool}
     return DistributedOperator(op, worker_pool, kwargs, distributed_type)
 end
 
 function DistributedOperator(
-        op::T, distributed_type::Val; kwargs...) where {T <: AbstractOperator}
+    op::T, distributed_type::Val; kwargs...
+) where {T<:AbstractOperator}
     return DistributedOperator(op, default_worker_pool(), kwargs, distributed_type)
 end
 
-function (M::DistributedOperator)(ensemble::E, args...) where {E <: AbstractEnsemble}
+function (M::DistributedOperator)(ensemble::E, args...) where {E<:AbstractEnsemble}
     return apply_operator(M, ensemble, args...)
 end
 
-function apply_operator(M::DistributedOperator{T, W, K, D}, ensemble::E,
-        args...) where {T, W, K, D, E <: AbstractEnsemble}
+function apply_operator(
+    M::DistributedOperator{T,W,K,D}, ensemble::E, args...
+) where {T,W,K,D,E<:AbstractEnsemble}
     seeds = nothing
     if T <: AbstractNoisyOperator
         if !(D in [:asyncmap])
@@ -40,7 +55,7 @@ function apply_operator(M::DistributedOperator{T, W, K, D}, ensemble::E,
         end
         seeds = Dict(p => Random.rand(UInt) for p in workers())
     end
-    function func0(; seeds = seeds, M = M, args = args)
+    function func0(; seeds=seeds, M=M, args=args)
         @debug "Initializing process $(myid())"
         if T <: AbstractNoisyOperator
             xor_seed!(M.op, seeds[myid()])
@@ -58,15 +73,17 @@ function apply_operator(M::DistributedOperator{T, W, K, D}, ensemble::E,
     return E(ensemble, members)
 end
 
-function _apply_operator(M::DistributedOperator{T, W, K, :pmap}, func0,
-        ensemble::AbstractEnsemble, args...) where {T, W, K}
+function _apply_operator(
+    M::DistributedOperator{T,W,K,:pmap}, func0, ensemble::AbstractEnsemble, args...
+) where {T,W,K}
     iterator = enumerate(get_ensemble_members(ensemble))
     func = func0()
     return pmap(func, M.worker_pool, iterator; M.pmap_kwargs...)
 end
 
-function _apply_operator(M::DistributedOperator{T, W, K, :distributed_for},
-        func0, ensemble::AbstractEnsemble) where {T, W, K}
+function _apply_operator(
+    M::DistributedOperator{T,W,K,:distributed_for}, func0, ensemble::AbstractEnsemble
+) where {T,W,K}
     members = get_ensemble_members(ensemble)
     func = func0()
     if M.worker_pool != default_worker_pool()
@@ -75,32 +92,35 @@ function _apply_operator(M::DistributedOperator{T, W, K, :distributed_for},
     results = @sync @distributed (vcat) for i in 1:length(members)
         [(i, func(i, members[i]))]
     end
-    sort!(results, by = first)
+    sort!(results; by=first)
     return last.(results)
 end
 
-function _apply_operator(M::DistributedOperator{T, W, K, :asyncmap}, func0_symbol,
-        ensemble::AbstractEnsemble) where {T, W, K}
+function _apply_operator(
+    M::DistributedOperator{T,W,K,:asyncmap}, func0_symbol, ensemble::AbstractEnsemble
+) where {T,W,K}
     members = get_ensemble_members(ensemble)
     output_array = Vector{eltype(members)}(undef, size(members))
     _run_parallel(func0_symbol, collect(enumerate(members)), output_array, M.worker_pool)
     return output_array
 end
 
-function split_clean_noisy(M::DistributedOperator{T, W, K, D},
-        ensemble_obs::AbstractEnsemble) where {T <: AbstractNoisyOperator, W, K, D}
-    split_clean_noisy(M.op, ensemble_obs)
+function split_clean_noisy(
+    M::DistributedOperator{T,W,K,D}, ensemble_obs::AbstractEnsemble
+) where {T<:AbstractNoisyOperator,W,K,D}
+    return split_clean_noisy(M.op, ensemble_obs)
 end
-function xor_seed!(M::DistributedOperator{T, W, K, D},
-        seed_mod::UInt) where {T <: AbstractNoisyOperator, W, K, D}
-    xor_seed!(M.op, seed_mod)
+function xor_seed!(
+    M::DistributedOperator{T,W,K,D}, seed_mod::UInt
+) where {T<:AbstractNoisyOperator,W,K,D}
+    return xor_seed!(M.op, seed_mod)
 end
 
 get_state_keys(M::DistributedOperator) = get_state_keys(M.op)
 
 # Based on Base.asyncmap
-function _run_parallel(f0_symbol, data, output_array, pool = default_worker_pool())
-    jobs = RemoteChannel(() -> Channel{Tuple{Int, eltype(data)}}(32))
+function _run_parallel(f0_symbol, data, output_array, pool=default_worker_pool())
+    jobs = RemoteChannel(() -> Channel{Tuple{Int,eltype(data)}}(32))
     results = RemoteChannel(() -> Channel{Tuple}(32))
 
     @assert length(data) == length(output_array)
@@ -117,8 +137,9 @@ function _run_parallel(f0_symbol, data, output_array, pool = default_worker_pool
                     put!(results, (job_id, out))
                 end
             catch ex
-                if isa(ex, RemoteException) && isa(ex.captured.ex, InvalidStateException) &&
-                   ex.captured.ex.state == :closed
+                if isa(ex, RemoteException) &&
+                    isa(ex.captured.ex, InvalidStateException) &&
+                    ex.captured.ex.state == :closed
                 elseif isa(ex, InvalidStateException) && ex.state == :closed
                 else
                     rethrow()
@@ -202,5 +223,5 @@ function _run_parallel(f0_symbol, data, output_array, pool = default_worker_pool
         v = fetch(t)
         isa(v, Exception) && throw(v)
     end
-    (ex_driver !== nothing) && throw(ex_driver)
+    return (ex_driver !== nothing) && throw(ex_driver)
 end

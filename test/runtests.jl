@@ -33,7 +33,7 @@ ts = @testset ReportingTestSet "" begin
         # )
     end
 
-    doctest(Ensembles; manual = true)
+    doctest(Ensembles; manual=true)
     if Ensembles.HAS_NATIVE_EXTENSIONS
         doctest(Ensembles.get_extension(Ensembles, :Lorenz63Ext); manual=true)
         # doctest(Ensembles.get_extension(Ensembles, :Lorenz96Ext); manual=true)

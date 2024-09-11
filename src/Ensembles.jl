@@ -65,15 +65,16 @@ else
     get_extension(mod, sym) = getfield(mod, sym)
 end
 
-import Pkg
-_dependencies = Dict{Symbol, Any}()
-_dependencies[:Lorenz63] = () -> Pkg.add(url = "https://github.com/milankl/Lorenz63.jl#15220a7")
+using Pkg: Pkg
+_dependencies = Dict{Symbol,Any}()
+_dependencies[:Lorenz63] =
+    () -> Pkg.add(; url="https://github.com/milankl/Lorenz63.jl#15220a7")
 
 function install(pkg::Symbol)
-    if ! (pkg in keys(_dependencies))
+    if !(pkg in keys(_dependencies))
         error("Unknown package: $pkg")
     end
-    _dependencies[pkg]()
+    return _dependencies[pkg]()
 end
 
 end # module

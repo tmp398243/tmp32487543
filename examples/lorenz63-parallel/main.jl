@@ -1,24 +1,23 @@
 # # Lorenz63 example
 # Set up environment
 
-import Pkg
+using Pkg: Pkg
 
 using Distributed
 
 using Ensembles
 
 try
-    import Lorenz63
+    using Lorenz63: Lorenz63
 catch
     Ensembles.install(:Lorenz63)
 end
 
-
 begin
     using Ensembles
 
-    import Lorenz63
-    import Random
+    using Lorenz63: Lorenz63
+    using Random: Random
 
     if isdefined(Base, :get_extension)
         ext = Base.get_extension(Ensembles, :Lorenz63Ext)
@@ -37,14 +36,24 @@ begin
     using Test
 end;
 
-function assimilate_data(filter::Nothing, prior_state::AbstractEnsemble,
-        prior_obs::AbstractEnsemble, y_obs, log_data = nothing)
+function assimilate_data(
+    filter::Nothing,
+    prior_state::AbstractEnsemble,
+    prior_obs::AbstractEnsemble,
+    y_obs,
+    log_data=nothing,
+)
     return assimilate_data(filter, prior_state, prior_obs, prior_obs, y_obs, log_data)
 end
 
 function assimilate_data(
-        filter::Nothing, prior_state::AbstractEnsemble, prior_obs_clean::AbstractEnsemble,
-        prior_obs_noisy::AbstractEnsemble, y_obs, log_data = nothing)
+    filter::Nothing,
+    prior_state::AbstractEnsemble,
+    prior_obs_clean::AbstractEnsemble,
+    prior_obs_noisy::AbstractEnsemble,
+    y_obs,
+    log_data=nothing,
+)
     return prior_state
 end
 
@@ -54,13 +63,13 @@ function generate_ensemble(params::Dict)
     ensemble_size = params["ensemble"]["size"]
     prior_type = params["ensemble"]["prior"]
 
-    members = Vector{Dict{Symbol, Any}}(undef, ensemble_size)
+    members = Vector{Dict{Symbol,Any}}(undef, ensemble_size)
     if prior_type == "gaussian"
         rng = Random.MersenneTwister(seed)
         prior_mean, prior_std = params["ensemble"]["prior_params"]
         for i in 1:ensemble_size
             data = prior_mean .+ prior_std .* randn(rng, 3)
-            state = Dict{Symbol, Any}(:state => data)
+            state = Dict{Symbol,Any}(:state => data)
             members[i] = state
         end
     else
@@ -77,16 +86,12 @@ params = Dict(
     "transition" => Dict(
         "sigma" => 10,
         "rho" => 28,
-        "beta" => 8/3,
+        "beta" => 8 / 3,
         "scaling" => 1,
         "ministep_nt" => missing,
         "ministep_dt" => 0.05,
     ),
-    "observation" => Dict(
-        "noise_scale" => 2,
-        "timestep_size" => 0.1,
-        "num_timesteps" => 5,
-    ),
+    "observation" => Dict("noise_scale" => 2, "timestep_size" => 0.1, "num_timesteps" => 5),
     "ensemble" => Dict(
         "size" => 5,
         "seed" => 9347215,
@@ -115,13 +120,13 @@ xor_seed!(observer, UInt64(0x243ecae5))
 observation_times = let
     step = params["observation"]["timestep_size"]
     length = params["observation"]["num_timesteps"]
-    range(;start=0, length, step)
+    range(; start=0, length, step)
 end
 
 # Generate synthetic ground-truth observations.
-if ! (@isdefined ground_truth) || isnothing(ground_truth)
+if !(@isdefined ground_truth) || isnothing(ground_truth)
     ground_truth = @time let
-        state0 = Dict{Symbol, Any}(:state => randn(3))
+        state0 = Dict{Symbol,Any}(:state => randn(3))
 
         ## Set seed for ground-truth simulation.
         Random.seed!(0xfee55e45)
@@ -129,8 +134,8 @@ if ! (@isdefined ground_truth) || isnothing(ground_truth)
 
         ## Generate states and observations.
         t0 = 0.0
-        states = Vector{Dict{Symbol, Any}}(undef, length(observation_times))
-        observations = Vector{Dict{Symbol, Any}}(undef, length(observation_times))
+        states = Vector{Dict{Symbol,Any}}(undef, length(observation_times))
+        observations = Vector{Dict{Symbol,Any}}(undef, length(observation_times))
         let state = state0
             for (i, t) in enumerate(observation_times)
                 state = transitioner(state, t0, t)
@@ -140,7 +145,7 @@ if ! (@isdefined ground_truth) || isnothing(ground_truth)
                 t0 = t
             end
         end
-        (;states, observations)
+        (; states, observations)
     end
     println("  ^ timing for making ground truth observations")
     ground_truth_states_vec = get_ensemble_matrix([:state], ground_truth.states)
@@ -149,8 +154,8 @@ end;
 
 # Make initial ensemble.
 
-if ! (@isdefined ensemble_initial0) || isnothing(ensemble_initial0)
-    ensemble_initial0 = generate_ensemble(params);
+if !(@isdefined ensemble_initial0) || isnothing(ensemble_initial0)
+    ensemble_initial0 = generate_ensemble(params)
 end
 
 ensemble_initial0 = generate_ensemble(params);
@@ -165,60 +170,72 @@ transition_noise = params["spinup"]["transition_noise_scale"]
 filter = nothing
 
 # Run sequential algorithm.
-if ! (@isdefined ensembles_sequential) || isnothing(ensembles_sequential)
-    ensembles_sequential = let t_index_end = params["spinup"]["num_timesteps"],
+if !(@isdefined ensembles_sequential) || isnothing(ensembles_sequential)
+    ensembles_sequential =
+        let t_index_end = params["spinup"]["num_timesteps"],
             observation_times = observation_times[1:t_index_end],
             ground_truth_observations = ground_truth.observations[1:t_index_end],
             ensemble = ensemble_initial0,
             t0 = 0.0,
             transition_noise = params["spinup"]["transition_noise_scale"]
-        Random.seed!(0x3289745)
-        xor_seed!(observer, UInt64(0x375ef928))
 
-        logs = []
-        ensembles = []
-        @time begin
-            push!(ensembles, (; ensemble, t = t0))
-            for (t, y_obs) in zip(observation_times, ground_truth_observations)
-                ## Advance ensemble to time t.
-                ensemble = transitioner(ensemble, t0, t; inplace = false)
+            Random.seed!(0x3289745)
+            xor_seed!(observer, UInt64(0x375ef928))
 
-                ## Keep ensemble separated.
-                if transition_noise != 0
-                    for em in ensemble.members
-                        em[:state] .+= transition_noise .* Random.randn(3)
+            logs = []
+            ensembles = []
+            @time begin
+                push!(ensembles, (; ensemble, t=t0))
+                for (t, y_obs) in zip(observation_times, ground_truth_observations)
+                    ## Advance ensemble to time t.
+                    ensemble = transitioner(ensemble, t0, t; inplace=false)
+
+                    ## Keep ensemble separated.
+                    if transition_noise != 0
+                        for em in ensemble.members
+                            em[:state] .+= transition_noise .* Random.randn(3)
+                        end
                     end
+
+                    ## Take observation at time t.
+                    ensemble_obs = observer(ensemble)
+                    ensemble_obs_clean, ensemble_obs_noisy = split_clean_noisy(
+                        observer, ensemble_obs
+                    )
+
+                    ## Record.
+                    push!(
+                        ensembles, (; ensemble, ensemble_obs_clean, ensemble_obs_noisy, t)
+                    )
+
+                    ## Assimilate observation
+                    log_data = Dict{Symbol,Any}()
+                    (posterior, timing...) = @timed assimilate_data(
+                        filter,
+                        ensemble,
+                        ensemble_obs_clean,
+                        ensemble_obs_noisy,
+                        y_obs,
+                        log_data,
+                    )
+                    log_data[:timing] = timing
+                    ensemble = posterior
+
+                    ## Record.
+                    push!(ensembles, (; ensemble, t))
+                    push!(logs, log_data)
+
+                    ## Let time pass.
+                    t0 = t
                 end
-
-                ## Take observation at time t.
-                ensemble_obs = observer(ensemble)
-                ensemble_obs_clean, ensemble_obs_noisy = split_clean_noisy(observer, ensemble_obs)
-
-                ## Record.
-                push!(ensembles, (; ensemble, ensemble_obs_clean, ensemble_obs_noisy, t))
-
-                ## Assimilate observation
-                log_data = Dict{Symbol, Any}()
-                (posterior, timing...) = @timed assimilate_data(
-                    filter, ensemble, ensemble_obs_clean, ensemble_obs_noisy, y_obs, log_data)
-                log_data[:timing] = timing
-                ensemble = posterior
-
-                ## Record.
-                push!(ensembles, (; ensemble, t))
-                push!(logs, log_data)
-
-                ## Let time pass.
-                t0 = t
             end
+            println("  ^ timing for making initial ensemble")
+            ensembles
         end
-        println("  ^ timing for making initial ensemble")
-        ensembles
-    end
 end
 
 # Run with file-based parallelism.
-worker_ids = addprocs(4, exeflags = "--project=$(Base.active_project())")
+worker_ids = addprocs(4; exeflags="--project=$(Base.active_project())")
 worker_ids_driver = vcat([1], worker_ids)
 try
     @everywhere worker_ids_driver begin
@@ -228,8 +245,8 @@ try
             ## Do imports
             using Ensembles
 
-            import Lorenz63
-            import Random
+            using Lorenz63: Lorenz63
+            using Random: Random
 
             if isdefined(Base, :get_extension)
                 ext = Base.get_extension(Ensembles, :Lorenz63Ext)
@@ -255,8 +272,12 @@ try
                 local parallel_strategy = FileBasedPartial(output_filepath, tmp_filepath)
                 local transitioner = Lorenz63Model(; params)
                 local closer, num_completed = run_partial_operator(
-                    parallel_strategy, worker, em -> transitioner(em, t, t0),
-                    ensemble; reset_state_keys = false)
+                    parallel_strategy,
+                    worker,
+                    em -> transitioner(em, t, t0),
+                    ensemble;
+                    reset_state_keys=false,
+                )
                 if closer
                     @debug "Transition: closer did $num_completed"
                 else
@@ -279,8 +300,8 @@ try
                 local observer = NoisyObserver(get_state_keys(transitioner); params)
                 xor_seed!(observer, UInt64(worker_id * num_workers - 1))
                 local closer, num_completed = run_partial_operator(
-                    parallel_strategy, worker, observer,
-                    ensemble; reset_state_keys = false)
+                    parallel_strategy, worker, observer, ensemble; reset_state_keys=false
+                )
                 if closer
                     @debug "Observer: closer did $num_completed"
                 else
@@ -296,7 +317,7 @@ try
         Random.seed!(0x3289745)
         xor_seed!(observer, UInt64(0x375ef928))
 
-        run_dir = tempname("."; cleanup = false)
+        run_dir = tempname("."; cleanup=false)
         @show run_dir
         mkpath(run_dir)
         save_ensemble(ensemble_initial, joinpath(run_dir, "ensemble_0_posterior"))
@@ -305,14 +326,23 @@ try
         ensembles = []
         @time "Run ensemble parallel" let ensemble = ensemble_initial
             t0 = 0.0
-            push!(ensembles, (; ensemble, t = t0))
-            for (k, (t, y_obs)) in enumerate(zip(
-                observation_times, ground_truth.observations))
+            push!(ensembles, (; ensemble, t=t0))
+            for (k, (t, y_obs)) in
+                enumerate(zip(observation_times, ground_truth.observations))
                 ## Advance ensemble to time t.
                 worker_tasks = []
                 for (i, p) in enumerate(worker_ids)
-                    task = remotecall(Main.worker_transition, p, run_dir, k,
-                        t0, t, params, i, length(worker_ids))
+                    task = remotecall(
+                        Main.worker_transition,
+                        p,
+                        run_dir,
+                        k,
+                        t0,
+                        t,
+                        params,
+                        i,
+                        length(worker_ids),
+                    )
                     push!(worker_tasks, task)
                 end
 
@@ -332,8 +362,15 @@ try
                 else
                     worker_tasks = []
                     for (i, p) in enumerate(worker_ids)
-                        task = remotecall(Main.worker_observer, p, run_dir,
-                            k, params, i, length(worker_ids))
+                        task = remotecall(
+                            Main.worker_observer,
+                            p,
+                            run_dir,
+                            k,
+                            params,
+                            i,
+                            length(worker_ids),
+                        )
                         push!(worker_tasks, task)
                     end
 
@@ -347,18 +384,29 @@ try
                 end
 
                 ensemble_obs_clean, ensemble_obs_noisy = split_clean_noisy(
-                    observer, ensemble_obs)
-                println("Time $t : noise norm $(norm(get_ensemble_matrix(ensemble_obs_clean) .- get_ensemble_matrix(ensemble_obs_noisy)))")
+                    observer, ensemble_obs
+                )
+                println(
+                    "Time $t : noise norm $(norm(get_ensemble_matrix(ensemble_obs_clean) .- get_ensemble_matrix(ensemble_obs_noisy)))",
+                )
 
                 ## Record.
                 push!(ensembles, (; ensemble, ensemble_obs_clean, ensemble_obs_noisy, t))
 
                 ## Assimilate observation
-                log_data = Dict{Symbol, Any}()
+                log_data = Dict{Symbol,Any}()
                 (posterior, timing...) = @timed assimilate_data(
-                    filter, ensemble, ensemble_obs_clean, ensemble_obs_noisy, y_obs, log_data)
+                    filter,
+                    ensemble,
+                    ensemble_obs_clean,
+                    ensemble_obs_noisy,
+                    y_obs,
+                    log_data,
+                )
                 log_data[:timing] = timing
-                println("Time $t : posterior norm $(norm(get_ensemble_matrix(ensemble) .- get_ensemble_matrix(posterior)))")
+                println(
+                    "Time $t : posterior norm $(norm(get_ensemble_matrix(ensemble) .- get_ensemble_matrix(posterior)))",
+                )
                 ensemble = posterior
                 save_ensemble(ensemble, joinpath(run_dir, "ensemble_$(k)_posterior"))
 
@@ -413,14 +461,14 @@ finally
 end;
 
 # Now do the transition in parallel, using the same observations as the sequential code.
-worker_ids = addprocs(4, exeflags = "--project=$(Base.active_project())")
+worker_ids = addprocs(4; exeflags="--project=$(Base.active_project())")
 try
     @everywhere worker_ids @eval begin
         ## Do imports
         using Ensembles
 
-        import Lorenz63
-        import Random
+        using Lorenz63: Lorenz63
+        using Random: Random
 
         if isdefined(Base, :get_extension)
             ext = Base.get_extension(Ensembles, :Lorenz63Ext)
@@ -441,46 +489,58 @@ try
         Random.seed!(0x3289745)
         xor_seed!(observer, UInt64(0x375ef928))
 
-        ensembles_parallel = let transitioner = DistributedOperator(
-                transitioner, Val(:pmap))
-            logs = []
-            ensembles = []
-            @time "Run ensemble parallel" let ensemble = ensemble_initial
-                t0 = 0.0
-                push!(ensembles, (; ensemble, t = t0))
-                i_obs = 2
-                for (t, y_obs) in zip(observation_times, ground_truth.observations)
-                    ## Advance ensemble to time t.
-                    ensemble = transitioner(ensemble, t0, t; inplace = false)
+        ensembles_parallel =
+            let transitioner = DistributedOperator(transitioner, Val(:pmap))
+                logs = []
+                ensembles = []
+                @time "Run ensemble parallel" let ensemble = ensemble_initial
+                    t0 = 0.0
+                    push!(ensembles, (; ensemble, t=t0))
+                    i_obs = 2
+                    for (t, y_obs) in zip(observation_times, ground_truth.observations)
+                        ## Advance ensemble to time t.
+                        ensemble = transitioner(ensemble, t0, t; inplace=false)
 
-                    ## Get observation at time t.
-                    ensemble_obs_clean = ensembles_sequential[i_obs].ensemble_obs_clean
-                    ensemble_obs_noisy = ensembles_sequential[i_obs].ensemble_obs_noisy
-                    i_obs += 2
-                    println("Time $t : noise norm $(norm(get_ensemble_matrix(ensemble_obs_clean) .- get_ensemble_matrix(ensemble_obs_noisy)))")
+                        ## Get observation at time t.
+                        ensemble_obs_clean = ensembles_sequential[i_obs].ensemble_obs_clean
+                        ensemble_obs_noisy = ensembles_sequential[i_obs].ensemble_obs_noisy
+                        i_obs += 2
+                        println(
+                            "Time $t : noise norm $(norm(get_ensemble_matrix(ensemble_obs_clean) .- get_ensemble_matrix(ensemble_obs_noisy)))",
+                        )
 
-                    ## Record.
-                    push!(
-                        ensembles, (; ensemble, ensemble_obs_clean, ensemble_obs_noisy, t))
+                        ## Record.
+                        push!(
+                            ensembles,
+                            (; ensemble, ensemble_obs_clean, ensemble_obs_noisy, t),
+                        )
 
-                    ## Assimilate observation
-                    log_data = Dict{Symbol, Any}()
-                    (posterior, timing...) = @timed assimilate_data(
-                        filter, ensemble, ensemble_obs_clean, ensemble_obs_noisy, y_obs, log_data)
-                    log_data[:timing] = timing
-                    println("Time $t : posterior norm $(norm(get_ensemble_matrix(ensemble) .- get_ensemble_matrix(posterior)))")
-                    ensemble = posterior
+                        ## Assimilate observation
+                        log_data = Dict{Symbol,Any}()
+                        (posterior, timing...) = @timed assimilate_data(
+                            filter,
+                            ensemble,
+                            ensemble_obs_clean,
+                            ensemble_obs_noisy,
+                            y_obs,
+                            log_data,
+                        )
+                        log_data[:timing] = timing
+                        println(
+                            "Time $t : posterior norm $(norm(get_ensemble_matrix(ensemble) .- get_ensemble_matrix(posterior)))",
+                        )
+                        ensemble = posterior
 
-                    ## Record.
-                    push!(ensembles, (; ensemble, t))
-                    push!(logs, log_data)
+                        ## Record.
+                        push!(ensembles, (; ensemble, t))
+                        push!(logs, log_data)
 
-                    ## Let time pass.
-                    t0 = t
+                        ## Let time pass.
+                        t0 = t
+                    end
                 end
+                ensembles
             end
-            ensembles
-        end
 
         ## Print out some info to make sure the results are the same.
         let
@@ -518,15 +578,15 @@ finally
 end;
 
 # Now do it all in parallel.
-worker_ids = addprocs(6, exeflags = "--project=$(Base.active_project())")
+worker_ids = addprocs(6; exeflags="--project=$(Base.active_project())")
 ensembles_parallel = try
     worker_pool = WorkerPool(worker_ids[3:end])
     @everywhere worker_ids @eval begin
         ## Do imports
         using Ensembles
 
-        import Lorenz63
-        import Random
+        using Lorenz63: Lorenz63
+        using Random: Random
 
         if isdefined(Base, :get_extension)
             ext = Base.get_extension(Ensembles, :Lorenz63Ext)
@@ -546,46 +606,60 @@ ensembles_parallel = try
     Random.seed!(0x3289745)
     xor_seed!(observer, UInt64(0x375ef928))
 
-    ensembles = let transitioner = DistributedOperator(
-            transitioner, worker_pool, Val(:pmap)),
-        observer = DistributedOperator(observer, worker_pool)
+    ensembles =
+        let transitioner = DistributedOperator(transitioner, worker_pool, Val(:pmap)),
+            observer = DistributedOperator(observer, worker_pool)
 
-        logs = []
-        ensembles = []
-        @time "Run ensemble parallel" let ensemble = ensemble_initial
-            t0 = 0.0
-            push!(ensembles, (; ensemble, t = t0))
-            for (t, y_obs) in zip(observation_times, ground_truth.observations)
-                ## Advance ensemble to time t.
-                ensemble = transitioner(ensemble, t0, t; inplace = false)
+            logs = []
+            ensembles = []
+            @time "Run ensemble parallel" let ensemble = ensemble_initial
+                t0 = 0.0
+                push!(ensembles, (; ensemble, t=t0))
+                for (t, y_obs) in zip(observation_times, ground_truth.observations)
+                    ## Advance ensemble to time t.
+                    ensemble = transitioner(ensemble, t0, t; inplace=false)
 
-                ## Take observation at time t.
-                ensemble_obs = observer(ensemble)
-                ensemble_obs_clean, ensemble_obs_noisy = split_clean_noisy(
-                    observer, ensemble_obs)
-                println("Time $t : noise norm $(norm(get_ensemble_matrix(ensemble_obs_clean) .- get_ensemble_matrix(ensemble_obs_noisy)))")
+                    ## Take observation at time t.
+                    ensemble_obs = observer(ensemble)
+                    ensemble_obs_clean, ensemble_obs_noisy = split_clean_noisy(
+                        observer, ensemble_obs
+                    )
+                    println(
+                        "Time $t : noise norm $(norm(get_ensemble_matrix(ensemble_obs_clean) .- get_ensemble_matrix(ensemble_obs_noisy)))",
+                    )
 
-                ## Record.
-                push!(ensembles, (; ensemble, ensemble_obs_clean, ensemble_obs_noisy, t))
+                    ## Record.
+                    push!(
+                        ensembles,
+                        (; ensemble, ensemble_obs_clean, ensemble_obs_noisy, t),
+                    )
 
-                ## Assimilate observation
-                log_data = Dict{Symbol, Any}()
-                (posterior, timing...) = @timed assimilate_data(
-                    filter, ensemble, ensemble_obs_clean, ensemble_obs_noisy, y_obs, log_data)
-                log_data[:timing] = timing
-                println("Time $t : posterior norm $(norm(get_ensemble_matrix(ensemble) .- get_ensemble_matrix(posterior)))")
-                ensemble = posterior
+                    ## Assimilate observation
+                    log_data = Dict{Symbol,Any}()
+                    (posterior, timing...) = @timed assimilate_data(
+                        filter,
+                        ensemble,
+                        ensemble_obs_clean,
+                        ensemble_obs_noisy,
+                        y_obs,
+                        log_data,
+                    )
+                    log_data[:timing] = timing
+                    println(
+                        "Time $t : posterior norm $(norm(get_ensemble_matrix(ensemble) .- get_ensemble_matrix(posterior)))",
+                    )
+                    ensemble = posterior
 
-                ## Record.
-                push!(ensembles, (; ensemble, t))
-                push!(logs, log_data)
+                    ## Record.
+                    push!(ensembles, (; ensemble, t))
+                    push!(logs, log_data)
 
-                ## Let time pass.
-                t0 = t
+                    ## Let time pass.
+                    t0 = t
+                end
             end
+            ensembles
         end
-        ensembles
-    end
 finally
     rmprocs(worker_ids)
 end;
