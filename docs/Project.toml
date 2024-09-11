@@ -2,8 +2,9 @@
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
 Ensembles = "6e62b0a0-f6e2-496f-914a-544f223f57d3"
 Literate = "98b081ad-f1c9-55d3-8b20-4c87d4299306"
-Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+Lorenz63 = "72db8b11-f6a9-4618-8243-341c46e36e41"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [compat]
 Literate = "2.18"

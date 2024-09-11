@@ -4,18 +4,30 @@ authors = ["Grant Bruer gbruer15@gmail.com and contributors"]
 version = "1.0.0-DEV"
 
 [deps]
+Distributed = "8ba89e20-285c-5b6f-9357-94700520ee1b"
+JLD2 = "033835bb-8acc-5ee8-8aae-3f567f8a3819"
 PackageExtensionCompat = "65ce6f38-6b18-4e1d-a461-8949797d7930"
+Pkg = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
+Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 
 [weakdeps]
-Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
+Lorenz63 = "72db8b11-f6a9-4618-8243-341c46e36e41"
+Lorenz96 = "3fb22c43-5981-45f6-b839-6cbd65dbe502"
 
 [extensions]
-RandomExt = "Random"
+Lorenz63Ext = "Lorenz63"
+Lorenz96Ext = "Lorenz96"
 
 [compat]
-PackageExtensionCompat = "1"
-julia = "1.8"
+Distributed = "1.7"
+JLD2 = "0.4"
+Lorenz63 = "0.1.0"
+Lorenz96 = "0.3.0"
+PackageExtensionCompat = "1.0.2"
 Random = "1.7"
+Pkg = "1.7"
+julia = "1.7"
 
 [extras]
-Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
+Lorenz63 = "72db8b11-f6a9-4618-8243-341c46e36e41"
+Lorenz96 = "3fb22c43-5981-45f6-b839-6cbd65dbe502"

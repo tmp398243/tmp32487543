@@ -19,9 +19,9 @@ Modules = [Ensembles]
 # Extensions
 
 ```@index
-Modules = [Ensembles.get_extension(Ensembles, :RandomExt)]
+Modules = [Ensembles.get_extension(Ensembles, :Lorenz63Ext)]
 ```
 
 ```@autodocs
-Modules = [Ensembles.get_extension(Ensembles, :RandomExt)]
+Modules = [Ensembles.get_extension(Ensembles, :Lorenz63Ext)]
 ```

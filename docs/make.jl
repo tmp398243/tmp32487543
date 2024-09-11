@@ -1,7 +1,6 @@
 using Pkg: Pkg
 using Ensembles
 using Documenter
-using Random # Loads Ensembles Random extension.
 
 using Literate
 
@@ -31,7 +30,7 @@ end
 build_examples = true
 build_notebooks = true
 build_scripts = true
-examples = ["Simple Usage" => "simple-usage"]
+examples = ["Lorenz63 Parallel" => "lorenz63-parallel"]
 examples_markdown = []
 
 function update_header(content, pth)
@@ -75,11 +74,14 @@ for (ex, pth) in examples
         end
         try
             # Build outputs.
+            println(Pkg.project())
             Literate.markdown(in_pth, out_dir; name="index", preprocess=upd, execute=true)
             if build_notebooks
+                println(Pkg.project())
                 Literate.notebook(in_pth, out_dir)
             end
             if build_scripts
+                println(Pkg.project())
                 Literate.script(in_pth, out_dir)
             end
         finally
@@ -91,16 +93,17 @@ end
 # Set metadata for doctests.
 DocMeta.setdocmeta!(Ensembles, :DocTestSetup, :(using Ensembles, Test); recursive=true)
 if Ensembles.HAS_NATIVE_EXTENSIONS
-    using Random
+    Ensembles.install(:Lorenz63)
+    using Lorenz63
     DocMeta.setdocmeta!(
-        Ensembles.get_extension(Ensembles, :RandomExt),
+        Ensembles.get_extension(Ensembles, :Lorenz63Ext),
         :DocTestSetup,
         :(using Ensembles, Test);
         recursive=true,
     )
 end
 makedocs(;
-    modules=[Ensembles, Ensembles.get_extension(Ensembles, :RandomExt)],
+    modules=[Ensembles, Ensembles.get_extension(Ensembles, :Lorenz63Ext)],
     authors="Grant Bruer gbruer15@gmail.com and contributors",
     sitename="Ensembles.jl",
     source=DOC_STAGE,

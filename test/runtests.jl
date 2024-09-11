@@ -11,24 +11,32 @@ ts = @testset ReportingTestSet "" begin
         Aqua.test_ambiguities(Ensembles)
     end
 
-    include("test_pkg_stuff.jl")
-
     # Set metadata for doctests.
     DocMeta.setdocmeta!(Ensembles, :DocTestSetup, :(using Ensembles, Test); recursive=true)
     if Ensembles.HAS_NATIVE_EXTENSIONS
-        using Random
+        Ensembles.install(:Lorenz63)
+        using Lorenz63
         DocMeta.setdocmeta!(
-            Ensembles.get_extension(Ensembles, :RandomExt),
+            Ensembles.get_extension(Ensembles, :Lorenz63Ext),
             :DocTestSetup,
             :(using Ensembles, Test);
             recursive=true,
         )
+
+        # Ensembles.install(:Lorenz96)
+        # using Lorenz96
+        # DocMeta.setdocmeta!(
+        #     Ensembles.get_extension(Ensembles, :Lorenz96Ext),
+        #     :DocTestSetup,
+        #     :(using Ensembles, Test);
+        #     recursive=true,
+        # )
     end
 
-    # Run doctests.
-    doctest(Ensembles; manual=true)
+    doctest(Ensembles; manual = true)
     if Ensembles.HAS_NATIVE_EXTENSIONS
-        doctest(Ensembles.get_extension(Ensembles, :RandomExt); manual=true)
+        doctest(Ensembles.get_extension(Ensembles, :Lorenz63Ext); manual=true)
+        # doctest(Ensembles.get_extension(Ensembles, :Lorenz96Ext); manual=true)
     end
 
     # Run examples.
