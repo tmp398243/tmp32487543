@@ -30,10 +30,7 @@ end
 build_examples = true
 build_notebooks = true
 build_scripts = true
-examples = [
-    "Example utils" => "_utils",
-    "Lorenz63 Parallel" => "lorenz63-parallel",
-]
+examples = ["Example utils" => "_utils", "Lorenz63 Parallel" => "lorenz63-parallel"]
 examples_markdown = []
 
 function update_header(content, pth)
