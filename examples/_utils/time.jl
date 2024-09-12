@@ -1,4 +1,6 @@
+export time_msg
 
+"""Hello"""
 macro time_msg(msg, ex)
     quote
         local _msg = $(esc(msg))

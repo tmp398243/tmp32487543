@@ -41,7 +41,8 @@ end
 @initial_imports
 worker_initial_imports = @macroexpand1 @initial_imports
 
-include("../_utils/utils.jl")
+mod = include("../_utils/utils.jl")
+using .mod
 
 # Define how to make the initial ensemble.
 function generate_ensemble(params::Dict)
