@@ -50,6 +50,7 @@ include("parallel.jl")
 include("parallel_file.jl")
 include("parallel_operators.jl")
 include("noisy_observer.jl")
+include("assimilation.jl")
 
 using PackageExtensionCompat
 function __init__()

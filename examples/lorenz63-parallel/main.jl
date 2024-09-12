@@ -22,18 +22,19 @@ end
 
 ## Define a macro for doing imports to avoid duplicating it for remote processes later on.
 macro initial_imports()
-    esc(
+    return esc(
         quote
             using Ensembles
             using LinearAlgebra: norm
-            using Distributed: addprocs, rmprocs, @everywhere, remotecall, fetch, WorkerPool
+            using Distributed:
+                addprocs, rmprocs, @everywhere, remotecall, fetch, WorkerPool
             using Test: @test
             using Random: Random
 
             using Lorenz63: Lorenz63
             ext = Ensembles.get_extension(Ensembles, :Lorenz63Ext)
             using .ext
-        end
+        end,
     )
 end
 
@@ -41,7 +42,6 @@ end
 worker_initial_imports = @macroexpand1 @initial_imports
 
 include("../_utils/utils.jl")
-
 
 # Define how to make the initial ensemble.
 function generate_ensemble(params::Dict)
