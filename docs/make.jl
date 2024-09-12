@@ -123,3 +123,12 @@ makedocs(;
     ],
     doctest=false,
 )
+
+if Ensembles.HAS_NATIVE_EXTENSIONS
+    # Maybe clean up a little.
+    try
+        Pkg.rm("Lorenz63")
+    catch e
+        @warn e
+    end
+end
