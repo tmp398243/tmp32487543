@@ -30,7 +30,10 @@ end
 build_examples = true
 build_notebooks = true
 build_scripts = true
-examples = ["Lorenz63 Parallel" => "lorenz63-parallel"]
+examples = [
+    "Example utils" => "_utils",
+    "Lorenz63 Parallel" => "lorenz63-parallel",
+]
 examples_markdown = []
 
 function update_header(content, pth)
@@ -65,6 +68,11 @@ for (ex, pth) in examples
 
         # Copy other files over to out_dir.
         Base.Filesystem.cptree(in_dir, out_dir)
+
+        if startswith(pth, "_")
+            continue
+        end
+
         rm(joinpath(out_dir, "main.jl"))
 
         if isdir(in_dir)
