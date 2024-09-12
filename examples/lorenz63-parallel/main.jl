@@ -36,6 +36,17 @@ begin
     using Test
 end;
 
+macro time_msg(msg, ex)
+    quote
+        local _msg = $(esc(msg))
+        local _msg_str = _msg === nothing ? _msg : string(_msg)
+        if _msg_str isa String
+            print(_msg_str, ": ")
+        end
+        @time($(esc(ex)))
+    end
+end
+
 function assimilate_data(
     filter::Nothing,
     prior_state::AbstractEnsemble,
@@ -324,7 +335,7 @@ try
 
         logs = []
         ensembles = []
-        @time "Run ensemble parallel" let ensemble = ensemble_initial
+        @time_msg "Run ensemble parallel" let ensemble = ensemble_initial
             t0 = 0.0
             push!(ensembles, (; ensemble, t=t0))
             for (k, (t, y_obs)) in
@@ -493,7 +504,7 @@ try
             let transitioner = DistributedOperator(transitioner, Val(:pmap))
                 logs = []
                 ensembles = []
-                @time "Run ensemble parallel" let ensemble = ensemble_initial
+                @time_msg "Run ensemble parallel" let ensemble = ensemble_initial
                     t0 = 0.0
                     push!(ensembles, (; ensemble, t=t0))
                     i_obs = 2
@@ -612,7 +623,7 @@ ensembles_parallel = try
 
             logs = []
             ensembles = []
-            @time "Run ensemble parallel" let ensemble = ensemble_initial
+            @time_msg "Run ensemble parallel" let ensemble = ensemble_initial
                 t0 = 0.0
                 push!(ensembles, (; ensemble, t=t0))
                 for (t, y_obs) in zip(observation_times, ground_truth.observations)
