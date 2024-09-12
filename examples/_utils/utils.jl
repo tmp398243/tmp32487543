@@ -1,1 +1,5 @@
 include("time.jl")
+include("plotting.jl")
+include("observers.jl")
+include("filters.jl")
+include("stats.jl")

@@ -51,6 +51,7 @@ include("parallel_file.jl")
 include("parallel_operators.jl")
 include("noisy_observer.jl")
 include("assimilation.jl")
+include("installs.jl")
 
 using PackageExtensionCompat
 function __init__()
@@ -64,18 +65,6 @@ if HAS_NATIVE_EXTENSIONS
     get_extension = Base.get_extension
 else
     get_extension(mod, sym) = getfield(mod, sym)
-end
-
-using Pkg: Pkg
-_dependencies = Dict{Symbol,Any}()
-_dependencies[:Lorenz63] =
-    () -> Pkg.add(; url="https://github.com/milankl/Lorenz63.jl#15220a7")
-
-function install(pkg::Symbol)
-    if !(pkg in keys(_dependencies))
-        error("Unknown package: $pkg")
-    end
-    return _dependencies[pkg]()
 end
 
 end # module

@@ -13,21 +13,25 @@ Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 [weakdeps]
 Lorenz63 = "72db8b11-f6a9-4618-8243-341c46e36e41"
 Lorenz96 = "3fb22c43-5981-45f6-b839-6cbd65dbe502"
+EnsembleKalmanFilters = "489b957c-0289-4703-8989-7a2007538216"
 
 [extensions]
 Lorenz63Ext = "Lorenz63"
+EnsembleKalmanFiltersExt = "EnsembleKalmanFilters"
 Lorenz96Ext = "Lorenz96"
 
 [compat]
 Distributed = "1.7"
+EnsembleKalmanFilters = "1"
 JLD2 = "0.4"
 Lorenz63 = "0.1.0"
 Lorenz96 = "0.3.0"
 PackageExtensionCompat = "1.0.2"
-Random = "1.7"
 Pkg = "1.7"
+Random = "1.7"
 julia = "1.7"
 
 [extras]
 Lorenz63 = "72db8b11-f6a9-4618-8243-341c46e36e41"
 Lorenz96 = "3fb22c43-5981-45f6-b839-6cbd65dbe502"
+EnsembleKalmanFilters = "489b957c-0289-4703-8989-7a2007538216"
