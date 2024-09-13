@@ -1,3 +1,4 @@
+export @time_msg
 
 macro time_msg(msg, ex)
     quote

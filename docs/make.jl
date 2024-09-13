@@ -30,12 +30,10 @@ end
 build_examples = true
 build_notebooks = true
 build_scripts = true
-examples = [
-    "Example utils" => "_utils",
-    "Lorenz63 Parallel" => "lorenz63-parallel",
-    "Lorenz63 EnKF" => "lorenz63-enkf",
-]
+examples = ["Lorenz63 Parallel" => "lorenz63-parallel", "Lorenz63 EnKF" => "lorenz63-enkf"]
+examples_extras = ["Example utils" => "_utils/utils.jl"]
 examples_markdown = []
+examples_extras_markdown = []
 
 function update_header(content, pth)
     links = []
@@ -59,6 +57,23 @@ end
 
 mkpath(joinpath(DOC_STAGE, "examples"))
 orig_project = Base.active_project()
+for (ex, pth) in examples_extras
+    in_dir = joinpath(REPO_ROOT, "examples", dirname(pth))
+    in_pth = joinpath(REPO_ROOT, "examples", pth)
+    out_dir = joinpath(DOC_STAGE, "examples", dirname(pth))
+
+    # Run file.
+    include(in_pth)
+
+    root_file = joinpath("examples", dirname(pth), "index.md")
+    if isfile(root_file)
+        push!(examples_extras_markdown, ex => root_file)
+    end
+
+    # Copy files over to out_dir.
+    Base.Filesystem.cptree(in_dir, out_dir)
+end
+
 for (ex, pth) in examples
     in_dir = joinpath(REPO_ROOT, "examples", pth)
     in_pth = joinpath(in_dir, "main.jl")
@@ -70,10 +85,6 @@ for (ex, pth) in examples
         # Copy other files over to out_dir.
         Base.Filesystem.cptree(in_dir, out_dir)
 
-        if startswith(pth, "_")
-            continue
-        end
-
         rm(joinpath(out_dir, "main.jl"))
 
         if isdir(in_dir)
@@ -83,14 +94,11 @@ for (ex, pth) in examples
         end
         try
             # Build outputs.
-            println(Pkg.project())
             Literate.markdown(in_pth, out_dir; name="index", preprocess=upd, execute=true)
             if build_notebooks
-                println(Pkg.project())
                 Literate.notebook(in_pth, out_dir)
             end
             if build_scripts
-                println(Pkg.project())
                 Literate.script(in_pth, out_dir)
             end
         finally
@@ -98,6 +106,7 @@ for (ex, pth) in examples
         end
     end
 end
+append!(examples_markdown, examples_extras_markdown)
 
 # Set metadata for doctests.
 DocMeta.setdocmeta!(Ensembles, :DocTestSetup, :(using Ensembles, Test); recursive=true)

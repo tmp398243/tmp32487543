@@ -1,6 +1,3 @@
-using LinearAlgebra: Diagonal
-using EnsembleKalmanFilters: EnKF
-
 function get_enkf_filter(params)
     obs_std = params["observation_noise_stddev"]
     noise_type = params["observation_noise_type"]

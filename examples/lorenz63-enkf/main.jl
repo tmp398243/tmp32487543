@@ -44,6 +44,10 @@ macro initial_imports()
             import EnsembleKalmanFilters
             ext = Ensembles.get_extension(Ensembles, :EnsembleKalmanFiltersExt)
             using .ext
+
+            using Statistics: Statistics, mean, var
+            using LinearAlgebra: Diagonal
+            using EnsembleKalmanFilters: EnKF
         end
     )
 end
