@@ -1,4 +1,4 @@
-export time_msg
+export @time_msg
 
 """Hello"""
 macro time_msg(msg, ex)
