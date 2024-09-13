@@ -42,6 +42,9 @@ ts = @testset ReportingTestSet "" begin
     # Run examples.
     examples_dir = joinpath(@__DIR__, "..", "examples")
     for example in readdir(examples_dir)
+        if startswith(example, "_")
+            continue
+        end
         example_path = joinpath(examples_dir, example)
         @show example_path
         orig_project = Base.active_project()

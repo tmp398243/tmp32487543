@@ -1,72 +1,48 @@
 # # Lorenz63 example
 # Set up environment
 
+## Fix for https://github.com/fredrikekre/Literate.jl/issues/251
+include(x) = Base.include(@__MODULE__, x)
+let
+    s = current_task().storage
+    if !isnothing(s)
+        s[:SOURCE_PATH] = @__FILE__
+    end
+end
+
+## Install unregistered packages.
 using Pkg: Pkg
 
-using Distributed
-
 using Ensembles
-
 try
     using Lorenz63: Lorenz63
 catch
     Ensembles.install(:Lorenz63)
 end
 
-begin
-    using Ensembles
+## Define a macro for doing imports to avoid duplicating it for remote processes later on.
+macro initial_imports()
+    return esc(
+        quote
+            using Ensembles
+            using LinearAlgebra: norm
+            using Distributed:
+                addprocs, rmprocs, @everywhere, remotecall, fetch, WorkerPool
+            using Test: @test
+            using Random: Random
 
-    using Lorenz63: Lorenz63
-    using Random: Random
-
-    if isdefined(Base, :get_extension)
-        ext = Base.get_extension(Ensembles, :Lorenz63Ext)
-        using .ext
-    else
-        using Ensembles.Lorenz63Ext
-    end
-
-    using LinearAlgebra
-    using IterativeSolvers: cg, cg!, CGStateVariables
-
-    using JLD2
-    using JOLI: joMatrix, jo_iterative_solver4square_set
-    using Statistics
-    using Distributed
-    using Test
-end;
-
-macro time_msg(msg, ex)
-    quote
-        local _msg = $(esc(msg))
-        local _msg_str = _msg === nothing ? _msg : string(_msg)
-        if _msg_str isa String
-            print(_msg_str, ": ")
-        end
-        @time($(esc(ex)))
-    end
+            using Lorenz63: Lorenz63
+            ext = Ensembles.get_extension(Ensembles, :Lorenz63Ext)
+            using .ext
+        end,
+    )
 end
 
-function assimilate_data(
-    filter::Nothing,
-    prior_state::AbstractEnsemble,
-    prior_obs::AbstractEnsemble,
-    y_obs,
-    log_data=nothing,
-)
-    return assimilate_data(filter, prior_state, prior_obs, prior_obs, y_obs, log_data)
-end
+@initial_imports
+worker_initial_imports = @macroexpand1 @initial_imports
 
-function assimilate_data(
-    filter::Nothing,
-    prior_state::AbstractEnsemble,
-    prior_obs_clean::AbstractEnsemble,
-    prior_obs_noisy::AbstractEnsemble,
-    y_obs,
-    log_data=nothing,
-)
-    return prior_state
-end
+mod = include("../_utils/utils.jl")
+using .mod
 
 # Define how to make the initial ensemble.
 function generate_ensemble(params::Dict)
@@ -250,29 +226,8 @@ worker_ids = addprocs(4; exeflags="--project=$(Base.active_project())")
 worker_ids_driver = vcat([1], worker_ids)
 try
     @everywhere worker_ids_driver begin
-        @eval begin
-            println("I am here")
-
-            ## Do imports
-            using Ensembles
-
-            using Lorenz63: Lorenz63
-            using Random: Random
-
-            if isdefined(Base, :get_extension)
-                ext = Base.get_extension(Ensembles, :Lorenz63Ext)
-                using .ext
-            else
-                using Ensembles.Lorenz63Ext
-            end
-
-            using LinearAlgebra
-            using IterativeSolvers: cg, cg!, CGStateVariables
-
-            using JLD2
-            using JOLI: joMatrix, jo_iterative_solver4square_set
-            using Statistics
-        end
+        println("I am here")
+        $worker_initial_imports
         function worker_transition(run_dir, k, t, t0, params, worker_id, num_workers)
             try
                 local worker = ParallelWorker(num_workers, worker_id)
@@ -474,27 +429,7 @@ end;
 # Now do the transition in parallel, using the same observations as the sequential code.
 worker_ids = addprocs(4; exeflags="--project=$(Base.active_project())")
 try
-    @everywhere worker_ids @eval begin
-        ## Do imports
-        using Ensembles
-
-        using Lorenz63: Lorenz63
-        using Random: Random
-
-        if isdefined(Base, :get_extension)
-            ext = Base.get_extension(Ensembles, :Lorenz63Ext)
-            using .ext
-        else
-            using Ensembles.Lorenz63Ext
-        end
-
-        using LinearAlgebra
-        using IterativeSolvers: cg, cg!, CGStateVariables
-
-        using JLD2
-        using JOLI: joMatrix, jo_iterative_solver4square_set
-        using Statistics
-    end
+    @everywhere worker_ids $worker_initial_imports
 
     for distributed_type in [:pmap, :distributed_for, :asyncmap]
         Random.seed!(0x3289745)
@@ -592,27 +527,7 @@ end;
 worker_ids = addprocs(6; exeflags="--project=$(Base.active_project())")
 ensembles_parallel = try
     worker_pool = WorkerPool(worker_ids[3:end])
-    @everywhere worker_ids @eval begin
-        ## Do imports
-        using Ensembles
-
-        using Lorenz63: Lorenz63
-        using Random: Random
-
-        if isdefined(Base, :get_extension)
-            ext = Base.get_extension(Ensembles, :Lorenz63Ext)
-            using .ext
-        else
-            using Ensembles.Lorenz63Ext
-        end
-
-        using LinearAlgebra
-        using IterativeSolvers: cg, cg!, CGStateVariables
-
-        using JLD2
-        using JOLI: joMatrix, jo_iterative_solver4square_set
-        using Statistics
-    end
+    @everywhere worker_ids $worker_initial_imports
 
     Random.seed!(0x3289745)
     xor_seed!(observer, UInt64(0x375ef928))
