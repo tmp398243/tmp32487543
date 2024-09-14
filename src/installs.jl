@@ -1,5 +1,5 @@
 
-import Pkg
+using Pkg: Pkg
 _dependencies = Dict{Symbol,Any}()
 _dependencies[:Lorenz63] =
     () -> Pkg.add(; url="https://github.com/milankl/Lorenz63.jl#15220a7")

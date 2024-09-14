@@ -15,40 +15,41 @@ using Pkg: Pkg
 
 using Ensembles
 try
-    import Lorenz63
+    using Lorenz63: Lorenz63
 catch
     Ensembles.install(:Lorenz63)
 end
 
 try
-    import EnsembleKalmanFilters
+    using EnsembleKalmanFilters: EnsembleKalmanFilters
 catch
     Ensembles.install(:EnsembleKalmanFilters)
 end
 
 ## Define a macro for doing imports to avoid duplicating it for remote processes later on.
 macro initial_imports()
-    esc(
+    return esc(
         quote
             using Ensembles
             using LinearAlgebra: norm
-            using Distributed: addprocs, rmprocs, @everywhere, remotecall, fetch, WorkerPool
+            using Distributed:
+                addprocs, rmprocs, @everywhere, remotecall, fetch, WorkerPool
             using Test: @test
             using Random: Random
             using CairoMakie
 
-            import Lorenz63
+            using Lorenz63: Lorenz63
             ext = Ensembles.get_extension(Ensembles, :Lorenz63Ext)
             using .ext
 
-            import EnsembleKalmanFilters
+            using EnsembleKalmanFilters: EnsembleKalmanFilters
             ext = Ensembles.get_extension(Ensembles, :EnsembleKalmanFiltersExt)
             using .ext
 
             using Statistics: Statistics, mean, var
             using LinearAlgebra: Diagonal
             using EnsembleKalmanFilters: EnKF
-        end
+        end,
     )
 end
 
@@ -56,7 +57,6 @@ end
 worker_initial_imports = @macroexpand1 @initial_imports
 
 include("../_utils/utils.jl")
-
 
 # Define how to make the initial ensemble.
 function generate_ensemble(params::Dict)
@@ -92,7 +92,8 @@ params = Dict(
         "ministep_nt" => missing,
         "ministep_dt" => 0.05,
     ),
-    "observation" => Dict("noise_scale" => 2, "timestep_size" => 0.1, "num_timesteps" => 300),
+    "observation" =>
+        Dict("noise_scale" => 2, "timestep_size" => 0.1, "num_timesteps" => 300),
     "ensemble" => Dict(
         "size" => 10,
         "seed" => 9347215,
@@ -169,12 +170,7 @@ if plot_ground_truth
         ts = observation_times
         data = reduce(hcat, state[:state] for state in ground_truth.states)
 
-        plot_kwargs = (;
-            color = "#7fc97f",
-            marker = '.',
-            markersize = 15,
-            markercolor = :black,
-        )
+        plot_kwargs = (; color="#7fc97f", marker='.', markersize=15, markercolor=:black)
         plot_state_over_time(observation_times, data; plot_kwargs...)
     end
 end
@@ -263,7 +259,6 @@ end
 
 # Define handy functions.
 
-
 function get_ground_truth_iterator(ensembles_ts, observation_times)
     gt_index = 1
     gt_indices = []
@@ -273,13 +268,17 @@ function get_ground_truth_iterator(ensembles_ts, observation_times)
             gt_index += 1
         end
         if gt_index > length(observation_times)
-            error("Comparing at time $(t) is impossible because final ground-truth observation is at time $(observation_times[end])")
+            error(
+                "Comparing at time $(t) is impossible because final ground-truth observation is at time $(observation_times[end])",
+            )
         end
         if observation_times[gt_index] != t
-            error("No observation at time $(t). Closest are $(observation_times[gt_index-1]) and $(observation_times[gt_index])")
+            error(
+                "No observation at time $(t). Closest are $(observation_times[gt_index-1]) and $(observation_times[gt_index])",
+            )
         end
         push!(gt_indices, gt_index)
-        if i == length(ensembles_ts) || t < ensembles_ts[i+1]
+        if i == length(ensembles_ts) || t < ensembles_ts[i + 1]
             push!(post_assim_indices, i)
         end
     end
@@ -295,8 +294,12 @@ function compute_errors(gt_indices, ensembles_means_vec, ground_truth_states_vec
 end
 
 function compute_metrics(ensembles)
-    means_vec = get_ensemble_matrix(ensembles[1].ensemble.state_keys, mean(e.ensemble) for e in ensembles)
-    vars_vec = get_ensemble_matrix(ensembles[1].ensemble.state_keys, var(e.ensemble) for e in ensembles)
+    means_vec = get_ensemble_matrix(
+        ensembles[1].ensemble.state_keys, mean(e.ensemble) for e in ensembles
+    )
+    vars_vec = get_ensemble_matrix(
+        ensembles[1].ensemble.state_keys, var(e.ensemble) for e in ensembles
+    )
     ts = [e.t for e in ensembles]
 
     gt_indices, post_assim_indices = get_ground_truth_iterator(ts, observation_times)
@@ -311,8 +314,8 @@ function compute_metrics(ensembles)
         post_assim_indices,
         rmses,
         spread,
-        post_assim_rmses = (rmses[i] for i in post_assim_indices),
-        post_assim_spread = (spread[i] for i in post_assim_indices),
+        post_assim_rmses=(rmses[i] for i in post_assim_indices),
+        post_assim_spread=(spread[i] for i in post_assim_indices),
     )
 end
 
@@ -330,7 +333,6 @@ println("Observations")
 println("  Average metrics")
 println("      RMSE: $(mean(rmse.(ground_truth_obs_vec, ground_truth_states_vec)))")
 println()
-
 
 # Plot metrics over time
 if !(@isdefined plot_initial_metrics)
@@ -359,18 +361,13 @@ if plot_initial_metrics
         end
         plot_kwargs = (;
             handler,
-            max_dt = 50,
-            make_positive = true,
-            color = "#7fc97f",
-            marker = '.',
-            markersize = 0,
-            markercolor = :black,
-            connect = (;
-                linestyle = :dash,
-                color = [1, 2],
-                colormap = :BuGn,
-                markersize = 0,
-            ),
+            max_dt=50,
+            make_positive=true,
+            color="#7fc97f",
+            marker='.',
+            markersize=0,
+            markercolor=:black,
+            connect=(; linestyle=:dash, color=[1, 2], colormap=:BuGn, markersize=0),
         )
         plot_state_over_time(metrics.ts[cut], metrics.vars_vec[:, cut]; plot_kwargs...)
 
@@ -387,17 +384,12 @@ if plot_initial_metrics
         end
         plot_kwargs = (;
             handler,
-            max_dt = 50,
-            color = "#041a1c",
-            marker = '.',
-            markersize = 15,
-            markercolor = :black,
-            connect = (;
-                linestyle = :dash,
-                color = [1, 2],
-                colormap = :BuGn,
-                markersize = 0,
-            ),
+            max_dt=50,
+            color="#041a1c",
+            marker='.',
+            markersize=15,
+            markercolor=:black,
+            connect=(; linestyle=:dash, color=[1, 2], colormap=:BuGn, markersize=0),
         )
         plot_error_metric_over_time(metrics.ts[cut], metrics.spread[cut]; plot_kwargs...)
 
@@ -414,17 +406,12 @@ if plot_initial_metrics
         end
         plot_kwargs = (;
             handler,
-            max_dt = 50,
-            color = "#e41a1c",
-            marker = '.',
-            markersize = 15,
-            markercolor = :black,
-            connect = (;
-                linestyle = :dash,
-                color = [1, 2],
-                colormap = :BuGn,
-                markersize = 0,
-            ),
+            max_dt=50,
+            color="#e41a1c",
+            marker='.',
+            markersize=15,
+            markercolor=:black,
+            connect=(; linestyle=:dash, color=[1, 2], colormap=:BuGn, markersize=0),
         )
         plot_error_metric_over_time(metrics.ts[cut], metrics.rmses[cut]; plot_kwargs...)
     end
@@ -444,10 +431,7 @@ if plot_initial_ensemble_mean
         zs_gt = view(ground_truth_states_vec, 3, :)
 
         gt_kwargs = (;
-            color = ("#d95f02", 0.5),
-            marker = '.',
-            markersize = 15,
-            markercolor = (:yellow, 0.5),
+            color=("#d95f02", 0.5), marker='.', markersize=15, markercolor=(:yellow, 0.5)
         )
 
         handler = function (fig)
@@ -455,36 +439,36 @@ if plot_initial_ensemble_mean
                 if isa(ax, Axis)
                     t0 = minimum(ax.scene.plots[1].args[1][])
                     tf = maximum(ax.scene.plots[1].args[1][])
-                    start = searchsortedfirst(ts_gt, t0) 
-                    finish = searchsortedfirst(ts_gt, tf) 
+                    start = searchsortedfirst(ts_gt, t0)
+                    finish = searchsortedfirst(ts_gt, tf)
                     if ax.ylabel[] == L"\text{x}"
-                        scatterlines!(ax, ts_gt[start:finish], xs_gt[start:finish]; gt_kwargs...)
+                        scatterlines!(
+                            ax, ts_gt[start:finish], xs_gt[start:finish]; gt_kwargs...
+                        )
                     elseif ax.ylabel[] == L"\text{y}"
-                        scatterlines!(ax, ts_gt[start:finish], ys_gt[start:finish]; gt_kwargs...)
+                        scatterlines!(
+                            ax, ts_gt[start:finish], ys_gt[start:finish]; gt_kwargs...
+                        )
                     elseif ax.ylabel[] == L"\text{z}"
-                        scatterlines!(ax, ts_gt[start:finish], zs_gt[start:finish]; gt_kwargs...)
+                        scatterlines!(
+                            ax, ts_gt[start:finish], zs_gt[start:finish]; gt_kwargs...
+                        )
                     end
                 end
             end
         end
         plot_kwargs = (;
             handler,
-            max_dt = 50,
-            color = "#7fc97f",
-            marker = '.',
-            markersize = 0,
-            markercolor = :black,
-            connect = (;
-                linestyle = :dash,
-                color = [1, 2],
-                colormap = :BuGn,
-                markersize = 0,
-            ),
+            max_dt=50,
+            color="#7fc97f",
+            marker='.',
+            markersize=0,
+            markercolor=:black,
+            connect=(; linestyle=:dash, color=[1, 2], colormap=:BuGn, markersize=0),
         )
         plot_state_over_time(metrics.ts[cut], metrics.means_vec[:, cut]; plot_kwargs...)
     end
 end
-
 
 # Maybe clean up a little.
 try

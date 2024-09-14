@@ -84,10 +84,7 @@ params = Dict(
         "prior" => "gaussian",
         "prior_params" => [0.0, 1.0],
     ),
-    "spinup" => Dict(
-        "num_timesteps" => 5,
-        "transition_noise_scale" => 0.0,
-    ),
+    "spinup" => Dict("num_timesteps" => 5, "transition_noise_scale" => 0.0),
 );
 
 # Seed for reproducibility.
