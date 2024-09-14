@@ -7,6 +7,6 @@ function get_enkf_filter(params)
     else
         throw(ArgumentError("Unknown observation noise type: $noise_type"))
     end
-    filter = EnKF(R; params);
+    filter = EnKF(R; params)
     return filter
 end

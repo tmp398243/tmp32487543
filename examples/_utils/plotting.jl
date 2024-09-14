@@ -29,17 +29,26 @@ function plot_disjoint_lines!(ax, times, ys; do_colors=false, connect=nothing, k
     while end_idx + 1 <= length(times)
         start_idx = end_idx + 1
         if !isnothing(connect) && end_idx > 0
-            sc = scatterlines!(ax, [times[end_idx], times[start_idx]], [ys[end_idx], ys[start_idx]]; connect...)
+            sc = scatterlines!(
+                ax,
+                [times[end_idx], times[start_idx]],
+                [ys[end_idx], ys[start_idx]];
+                connect...,
+            )
         end
         end_idx = get_next_jump_idx(times, start_idx)
         if do_colors
             color = 1:(end_idx - start_idx + 1)
         end
         if isnothing(color)
-            sc = scatterlines!(ax, times[start_idx:end_idx], ys[start_idx:end_idx]; kwargs...)
+            sc = scatterlines!(
+                ax, times[start_idx:end_idx], ys[start_idx:end_idx]; kwargs...
+            )
             color = sc.color
         else
-            sc = scatterlines!(ax, times[start_idx:end_idx], ys[start_idx:end_idx]; kwargs..., color)
+            sc = scatterlines!(
+                ax, times[start_idx:end_idx], ys[start_idx:end_idx]; kwargs..., color
+            )
         end
         color = sc.color
     end
@@ -49,12 +58,15 @@ function plot_disjoint_lines(times, ys; kwargs...)
     start_idx = 1
     end_idx = get_next_jump_idx(times, start_idx)
     fig, ax, sc = scatterlines(times[start_idx:end_idx], ys[start_idx:end_idx]; kwargs...)
-    plot_disjoint_lines!(ax, times[end_idx+1:end], ys[end_idx+1:end]; color=sc.color, kwargs...)
+    plot_disjoint_lines!(
+        ax, times[(end_idx + 1):end], ys[(end_idx + 1):end]; color=sc.color, kwargs...
+    )
     return fig, ax, sc
 end
 
-function plot_state_over_time(ts, data; make_positive=false, max_dt=100, handler=nothing, plot_kwargs...)
-
+function plot_state_over_time(
+    ts, data; make_positive=false, max_dt=100, handler=nothing, plot_kwargs...
+)
     xs = view(data, 1, :)
     ys = view(data, 2, :)
     zs = view(data, 3, :)
@@ -84,9 +96,7 @@ function plot_state_over_time(ts, data; make_positive=false, max_dt=100, handler
         handle_zeros!(zs)
     end
 
-    function plot_this_thing(;
-        xlims=(;low=nothing, high=nothing)
-    )
+    function plot_this_thing(; xlims=(; low=nothing, high=nothing))
         fig = Figure()
 
         ## Plot x vs t.
@@ -124,19 +134,18 @@ function plot_state_over_time(ts, data; make_positive=false, max_dt=100, handler
 
     fig = plot_this_thing()
     display(fig)
-    for low = ts[1]:max_dt:ts[end]
+    for low in ts[1]:max_dt:ts[end]
         high = min(low + max_dt, ts[end])
-        fig = plot_this_thing(; xlims=(;low, high))
+        fig = plot_this_thing(; xlims=(; low, high))
         display(fig)
         break
     end
 end
 
-
-function plot_error_metric_over_time(ts, metrics; max_dt = 50, handler=nothing, plot_kwargs...)
-    function plot_this_thing(;
-        xlims=(;low=nothing, high=nothing)
-    )
+function plot_error_metric_over_time(
+    ts, metrics; max_dt=50, handler=nothing, plot_kwargs...
+)
+    function plot_this_thing(; xlims=(; low=nothing, high=nothing))
         fig = Figure()
         ax = Axis(fig)
         fig[1, 1] = ax
@@ -156,9 +165,9 @@ function plot_error_metric_over_time(ts, metrics; max_dt = 50, handler=nothing, 
     fig = plot_this_thing()
     display(fig)
 
-    for low = ts[1]:max_dt:ts[end]
+    for low in ts[1]:max_dt:ts[end]
         high = min(low + max_dt, ts[end])
-        fig = plot_this_thing(; xlims=(;low, high))
+        fig = plot_this_thing(; xlims=(; low, high))
         display(fig)
         break
     end

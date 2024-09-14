@@ -1,15 +1,11 @@
 module EnsembleKalmanFiltersExt
 
-using Ensembles: Ensembles, Ensemble, get_ensemble_matrix, get_ensemble_dicts, get_member_vector
+using Ensembles:
+    Ensembles, Ensemble, get_ensemble_matrix, get_ensemble_dicts, get_member_vector
 using EnsembleKalmanFilters: EnsembleKalmanFilters, EnKF
 
 function Ensembles.assimilate_data(
-    filter::EnKF,
-    ensemble,
-    ensemble_obs_clean,
-    ensemble_obs_noisy,
-    y_obs,
-    log_data,
+    filter::EnKF, ensemble, ensemble_obs_clean, ensemble_obs_noisy, y_obs, log_data
 )
     X_matrix = EnsembleKalmanFilters.assimilate_data(
         filter,
