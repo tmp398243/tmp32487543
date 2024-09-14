@@ -318,12 +318,12 @@ end
 
 # Compute metrics.
 
-metrics = compute_metrics(ensembles)
+metrics_initial = compute_metrics(ensembles)
 
 println("SPINUP")
 println("  Average metrics")
-println("      RMSE: $(mean(metrics.post_assim_rmses))")
-println("    Spread: $(mean(metrics.post_assim_spread))")
+println("      RMSE: $(mean(metrics_initial.post_assim_rmses))")
+println("    Spread: $(mean(metrics_initial.post_assim_spread))")
 println()
 
 println("Observations")
@@ -388,7 +388,6 @@ if plot_initial_metrics
         plot_kwargs = (;
             handler,
             max_dt = 50,
-            make_positive = true,
             color = "#041a1c",
             marker = '.',
             markersize = 15,
@@ -416,7 +415,6 @@ if plot_initial_metrics
         plot_kwargs = (;
             handler,
             max_dt = 50,
-            make_positive = true,
             color = "#e41a1c",
             marker = '.',
             markersize = 15,
