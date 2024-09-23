@@ -1,3 +1,4 @@
+using CairoMakie
 
 function get_next_jump_idx(times, idx=1)
     """Advance idx until two consecutive times are not strictly increasing.
@@ -65,7 +66,7 @@ function plot_disjoint_lines(times, ys; kwargs...)
 end
 
 function plot_state_over_time(
-    ts, data; make_positive=false, max_dt=100, handler=nothing, plot_kwargs...
+    ts, data; make_positive=false, max_dt=nothing, handler=nothing, plot_kwargs...
 )
     xs = view(data, 1, :)
     ys = view(data, 2, :)
@@ -133,17 +134,19 @@ function plot_state_over_time(
     end
 
     fig = plot_this_thing()
-    display(fig)
-    for low in ts[1]:max_dt:ts[end]
-        high = min(low + max_dt, ts[end])
-        fig = plot_this_thing(; xlims=(; low, high))
-        display(fig)
-        break
+    figs = [fig]
+    if !isnothing(max_dt) && ts[1] + max_dt < ts[end]
+        for low in ts[1]:max_dt:ts[end]
+            high = min(low + max_dt, ts[end])
+            fig = plot_this_thing(; xlims=(; low, high))
+            push!(figs, fig)
+        end
     end
+    return figs
 end
 
 function plot_error_metric_over_time(
-    ts, metrics; max_dt=50, handler=nothing, plot_kwargs...
+    ts, metrics; max_dt=nothing, handler=nothing, plot_kwargs...
 )
     function plot_this_thing(; xlims=(; low=nothing, high=nothing))
         fig = Figure()
@@ -163,12 +166,13 @@ function plot_error_metric_over_time(
     end
 
     fig = plot_this_thing()
-    display(fig)
-
-    for low in ts[1]:max_dt:ts[end]
-        high = min(low + max_dt, ts[end])
-        fig = plot_this_thing(; xlims=(; low, high))
-        display(fig)
-        break
+    figs = [fig]
+    if !isnothing(max_dt) && ts[1] + max_dt < ts[end]
+        for low in ts[1]:max_dt:ts[end]
+            high = min(low + max_dt, ts[end])
+            fig = plot_this_thing(; xlims=(; low, high))
+            push!(figs, fig)
+        end
     end
+    return figs
 end

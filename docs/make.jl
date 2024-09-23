@@ -63,7 +63,16 @@ for (ex, pth) in examples_extras
     out_dir = joinpath(DOC_STAGE, "examples", dirname(pth))
 
     # Run file.
-    include(in_pth)
+    if isdir(in_dir)
+        Pkg.activate(in_dir)
+        Pkg.develop(; path=joinpath(@__DIR__, ".."))
+        Pkg.instantiate()
+    end
+    try
+        include(in_pth)
+    finally
+        Pkg.activate(orig_project)
+    end
 
     root_file = joinpath("examples", dirname(pth), "index.md")
     if isfile(root_file)

@@ -1,15 +1,6 @@
 # # Lorenz63 example
 # Set up environment
 
-## Fix for https://github.com/fredrikekre/Literate.jl/issues/251
-include(x) = Base.include(@__MODULE__, x)
-let
-    s = current_task().storage
-    if !isnothing(s)
-        s[:SOURCE_PATH] = @__FILE__
-    end
-end
-
 ## Install unregistered packages.
 using Pkg: Pkg
 
@@ -56,7 +47,7 @@ end
 @initial_imports
 worker_initial_imports = @macroexpand1 @initial_imports
 
-include("../_utils/utils.jl")
+include("../_utils/utils.jl");
 
 # Define how to make the initial ensemble.
 function generate_ensemble(params::Dict)
@@ -114,7 +105,7 @@ params = Dict(
 );
 
 # Seed for reproducibility.
-Random.seed!(1983745)
+Random.seed!(1983745);
 
 # Make operators.
 transitioner = Lorenz63Model(; params)
@@ -122,7 +113,7 @@ observer = NoisyObserver(get_state_keys(transitioner); params);
 
 # Set seed for ground-truth simulation.
 Random.seed!(0xfee55e45)
-xor_seed!(observer, UInt64(0x243ecae5))
+xor_seed!(observer, UInt64(0x243ecae5));
 
 # Define observation times
 observation_times = let
@@ -166,13 +157,14 @@ if !(@isdefined plot_ground_truth)
     plot_ground_truth = true
 end
 if plot_ground_truth
-    let
+    figs = let
         ts = observation_times
         data = reduce(hcat, state[:state] for state in ground_truth.states)
 
         plot_kwargs = (; color="#7fc97f", marker='.', markersize=15, markercolor=:black)
         plot_state_over_time(observation_times, data; plot_kwargs...)
     end
+    figs[1]
 end
 
 # Make initial ensemble.
@@ -187,7 +179,7 @@ ensemble_initial = Ensemble(ensemble_initial0, ensemble_initial0.members, [:stat
 t_index_end = params["spinup"]["num_timesteps"]
 observation_times = observation_times[1:t_index_end]
 ground_truth_observations = ground_truth.observations[1:t_index_end]
-transition_noise = params["spinup"]["transition_noise_scale"]
+transition_noise = params["spinup"]["transition_noise_scale"];
 
 # Choose filtering algorithm.
 filter = get_enkf_filter(params["spinup"])
@@ -255,7 +247,7 @@ if !(@isdefined ensembles) || isnothing(ensembles)
             println("  ^ timing for making initial ensemble")
             ensembles
         end
-end
+end;
 
 # Define handy functions.
 
@@ -317,7 +309,7 @@ function compute_metrics(ensembles)
         post_assim_rmses=(rmses[i] for i in post_assim_indices),
         post_assim_spread=(spread[i] for i in post_assim_indices),
     )
-end
+end;
 
 # Compute metrics.
 
@@ -339,7 +331,7 @@ if !(@isdefined plot_initial_metrics)
     plot_initial_metrics = true
 end
 if plot_initial_metrics
-    let metrics = metrics_initial
+    figs_state, figs_spread, figs_rmse = let metrics = metrics_initial
         cut = Colon()
 
         ## Plot variance.
@@ -369,7 +361,7 @@ if plot_initial_metrics
             markercolor=:black,
             connect=(; linestyle=:dash, color=[1, 2], colormap=:BuGn, markersize=0),
         )
-        plot_state_over_time(metrics.ts[cut], metrics.vars_vec[:, cut]; plot_kwargs...)
+        figs_state = plot_state_over_time(metrics.ts[cut], metrics.vars_vec[:, cut]; plot_kwargs...)
 
         ## Plot ensemble spread.
         handler = function (fig)
@@ -391,7 +383,7 @@ if plot_initial_metrics
             markercolor=:black,
             connect=(; linestyle=:dash, color=[1, 2], colormap=:BuGn, markersize=0),
         )
-        plot_error_metric_over_time(metrics.ts[cut], metrics.spread[cut]; plot_kwargs...)
+        figs_spread = plot_error_metric_over_time(metrics.ts[cut], metrics.spread[cut]; plot_kwargs...)
 
         ## Plot RMSE.
         handler = function (fig)
@@ -413,16 +405,27 @@ if plot_initial_metrics
             markercolor=:black,
             connect=(; linestyle=:dash, color=[1, 2], colormap=:BuGn, markersize=0),
         )
-        plot_error_metric_over_time(metrics.ts[cut], metrics.rmses[cut]; plot_kwargs...)
+        figs_rmse = plot_error_metric_over_time(metrics.ts[cut], metrics.rmses[cut]; plot_kwargs...)
+        figs_state, figs_spread, figs_rmse
     end
+    figs_state[1]
 end
+#-
+if plot_initial_metrics
+    figs_spread[1]
+end
+#-
+if plot_initial_metrics
+    figs_rmse[1]
+end
+
 
 # Plot the ensemble mean.
 if !(@isdefined plot_initial_ensemble_mean)
-    plot_initial_ensemble_mean = false
+    plot_initial_ensemble_mean = true
 end
 if plot_initial_ensemble_mean
-    let metrics = metrics_initial
+    figs = let metrics = metrics_initial
         cut = Colon()
 
         ts_gt = observation_times
@@ -466,8 +469,9 @@ if plot_initial_ensemble_mean
             markercolor=:black,
             connect=(; linestyle=:dash, color=[1, 2], colormap=:BuGn, markersize=0),
         )
-        plot_state_over_time(metrics.ts[cut], metrics.means_vec[:, cut]; plot_kwargs...)
+        figs = plot_state_over_time(metrics.ts[cut], metrics.means_vec[:, cut]; plot_kwargs...)
     end
+    figs[1]
 end
 
 # Maybe clean up a little.
