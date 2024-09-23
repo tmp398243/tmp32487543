@@ -361,7 +361,9 @@ if plot_initial_metrics
             markercolor=:black,
             connect=(; linestyle=:dash, color=[1, 2], colormap=:BuGn, markersize=0),
         )
-        figs_state = plot_state_over_time(metrics.ts[cut], metrics.vars_vec[:, cut]; plot_kwargs...)
+        figs_state = plot_state_over_time(
+            metrics.ts[cut], metrics.vars_vec[:, cut]; plot_kwargs...
+        )
 
         ## Plot ensemble spread.
         handler = function (fig)
@@ -383,7 +385,9 @@ if plot_initial_metrics
             markercolor=:black,
             connect=(; linestyle=:dash, color=[1, 2], colormap=:BuGn, markersize=0),
         )
-        figs_spread = plot_error_metric_over_time(metrics.ts[cut], metrics.spread[cut]; plot_kwargs...)
+        figs_spread = plot_error_metric_over_time(
+            metrics.ts[cut], metrics.spread[cut]; plot_kwargs...
+        )
 
         ## Plot RMSE.
         handler = function (fig)
@@ -405,7 +409,9 @@ if plot_initial_metrics
             markercolor=:black,
             connect=(; linestyle=:dash, color=[1, 2], colormap=:BuGn, markersize=0),
         )
-        figs_rmse = plot_error_metric_over_time(metrics.ts[cut], metrics.rmses[cut]; plot_kwargs...)
+        figs_rmse = plot_error_metric_over_time(
+            metrics.ts[cut], metrics.rmses[cut]; plot_kwargs...
+        )
         figs_state, figs_spread, figs_rmse
     end
     figs_state[1]
@@ -418,7 +424,6 @@ end
 if plot_initial_metrics
     figs_rmse[1]
 end
-
 
 # Plot the ensemble mean.
 if !(@isdefined plot_initial_ensemble_mean)
@@ -434,7 +439,10 @@ if plot_initial_ensemble_mean
         zs_gt = view(ground_truth_states_vec, 3, :)
 
         gt_kwargs = (;
-            color=("#d95f02", 0.5), marker='.', markersize=15, markercolor=(:yellow, 0.5)
+            color=("#d95f02", 0.5),
+            marker='.',
+            markersize=15,
+            markercolor=(:yellow, 0.5),
         )
 
         handler = function (fig)
@@ -446,15 +454,24 @@ if plot_initial_ensemble_mean
                     finish = searchsortedfirst(ts_gt, tf)
                     if ax.ylabel[] == L"\text{x}"
                         scatterlines!(
-                            ax, ts_gt[start:finish], xs_gt[start:finish]; gt_kwargs...
+                            ax,
+                            ts_gt[start:finish],
+                            xs_gt[start:finish];
+                            gt_kwargs...,
                         )
                     elseif ax.ylabel[] == L"\text{y}"
                         scatterlines!(
-                            ax, ts_gt[start:finish], ys_gt[start:finish]; gt_kwargs...
+                            ax,
+                            ts_gt[start:finish],
+                            ys_gt[start:finish];
+                            gt_kwargs...,
                         )
                     elseif ax.ylabel[] == L"\text{z}"
                         scatterlines!(
-                            ax, ts_gt[start:finish], zs_gt[start:finish]; gt_kwargs...
+                            ax,
+                            ts_gt[start:finish],
+                            zs_gt[start:finish];
+                            gt_kwargs...,
                         )
                     end
                 end
@@ -469,7 +486,9 @@ if plot_initial_ensemble_mean
             markercolor=:black,
             connect=(; linestyle=:dash, color=[1, 2], colormap=:BuGn, markersize=0),
         )
-        figs = plot_state_over_time(metrics.ts[cut], metrics.means_vec[:, cut]; plot_kwargs...)
+        figs = plot_state_over_time(
+            metrics.ts[cut], metrics.means_vec[:, cut]; plot_kwargs...
+        )
     end
     figs[1]
 end
