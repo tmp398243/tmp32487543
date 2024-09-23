@@ -30,7 +30,7 @@ end
 build_examples = true
 build_notebooks = true
 build_scripts = true
-examples = ["Lorenz63 Parallel" => "lorenz63-parallel", "Lorenz63 EnKF" => "lorenz63-enkf"]
+examples = ["Lorenz63" => "lorenz63", "Parallelization" => "parallel"]
 examples_extras = ["Example utils" => "_utils/utils.jl"]
 examples_markdown = []
 examples_extras_markdown = []
