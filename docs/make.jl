@@ -30,7 +30,7 @@ end
 build_examples = true
 build_notebooks = true
 build_scripts = true
-examples = ["Lorenz63 Parallel" => "lorenz63-parallel"]
+examples = ["Lorenz63 Parallel" => "lorenz63-parallel", "Lorenz63 EnKF" => "lorenz63-enkf"]
 examples_extras = ["Example utils" => "_utils/utils.jl"]
 examples_markdown = []
 examples_extras_markdown = []
@@ -63,7 +63,16 @@ for (ex, pth) in examples_extras
     out_dir = joinpath(DOC_STAGE, "examples", dirname(pth))
 
     # Run file.
-    include(in_pth)
+    if isdir(in_dir)
+        Pkg.activate(in_dir)
+        Pkg.develop(; path=joinpath(@__DIR__, ".."))
+        Pkg.instantiate()
+    end
+    try
+        include(in_pth)
+    finally
+        Pkg.activate(orig_project)
+    end
 
     root_file = joinpath("examples", dirname(pth), "index.md")
     if isfile(root_file)

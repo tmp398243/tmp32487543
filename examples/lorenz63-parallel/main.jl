@@ -41,8 +41,7 @@ end
 @initial_imports
 worker_initial_imports = @macroexpand1 @initial_imports
 
-mod = include("../_utils/utils.jl")
-using .mod
+include("../_utils/time.jl")
 
 # Define how to make the initial ensemble.
 function generate_ensemble(params::Dict)
@@ -85,11 +84,7 @@ params = Dict(
         "prior" => "gaussian",
         "prior_params" => [0.0, 1.0],
     ),
-    "spinup" => Dict(
-        "assimilation_type" => "sequential",
-        "num_timesteps" => 5,
-        "transition_noise_scale" => 0.0,
-    ),
+    "spinup" => Dict("num_timesteps" => 5, "transition_noise_scale" => 0.0),
 );
 
 # Seed for reproducibility.
