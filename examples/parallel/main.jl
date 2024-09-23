@@ -1,14 +1,9 @@
-# # Lorenz63 example
-# Set up environment
-
-## Fix for https://github.com/fredrikekre/Literate.jl/issues/251
-include(x) = Base.include(@__MODULE__, x)
-let
-    s = current_task().storage
-    if !isnothing(s)
-        s[:SOURCE_PATH] = @__FILE__
-    end
-end
+# # Parallelization example
+#
+# Note: The packages for this example are documented in the [Project.toml](Project.toml),
+#       except for some unregistered packages.
+#
+# First, we'll set up the environment, which entails installing and importing packages.
 
 ## Install unregistered packages.
 using Pkg: Pkg
@@ -42,29 +37,6 @@ end
 worker_initial_imports = @macroexpand1 @initial_imports
 
 include("../_utils/time.jl")
-
-# Define how to make the initial ensemble.
-function generate_ensemble(params::Dict)
-    seed = params["ensemble"]["seed"]
-    ensemble_size = params["ensemble"]["size"]
-    prior_type = params["ensemble"]["prior"]
-
-    members = Vector{Dict{Symbol,Any}}(undef, ensemble_size)
-    if prior_type == "gaussian"
-        rng = Random.MersenneTwister(seed)
-        prior_mean, prior_std = params["ensemble"]["prior_params"]
-        for i in 1:ensemble_size
-            data = prior_mean .+ prior_std .* randn(rng, 3)
-            state = Dict{Symbol,Any}(:state => data)
-            members[i] = state
-        end
-    else
-        throw(ArgumentError("Invalid prior type: $prior_type"))
-    end
-
-    ensemble = Ensemble(members)
-    return ensemble
-end;
 
 # Define parameters.
 params = Dict(
@@ -134,7 +106,31 @@ if !(@isdefined ground_truth) || isnothing(ground_truth)
     ground_truth_obs_vec = get_ensemble_matrix([:state], ground_truth.observations)
 end;
 
+# # Ensembles
+#
 # Make initial ensemble.
+
+function generate_ensemble(params::Dict)
+    seed = params["ensemble"]["seed"]
+    ensemble_size = params["ensemble"]["size"]
+    prior_type = params["ensemble"]["prior"]
+
+    members = Vector{Dict{Symbol,Any}}(undef, ensemble_size)
+    if prior_type == "gaussian"
+        rng = Random.MersenneTwister(seed)
+        prior_mean, prior_std = params["ensemble"]["prior_params"]
+        for i in 1:ensemble_size
+            data = prior_mean .+ prior_std .* randn(rng, 3)
+            state = Dict{Symbol,Any}(:state => data)
+            members[i] = state
+        end
+    else
+        throw(ArgumentError("Invalid prior type: $prior_type"))
+    end
+
+    ensemble = Ensemble(members)
+    return ensemble
+end;
 
 if !(@isdefined ensemble_initial0) || isnothing(ensemble_initial0)
     ensemble_initial0 = generate_ensemble(params)
@@ -148,6 +144,8 @@ observation_times = observation_times[1:t_index_end]
 ground_truth_observations = ground_truth.observations[1:t_index_end]
 transition_noise = params["spinup"]["transition_noise_scale"]
 
+# # Data assimilation
+#
 # Choose filtering algorithm.
 filter = nothing
 
@@ -216,7 +214,10 @@ if !(@isdefined ensembles_sequential) || isnothing(ensembles_sequential)
         end
 end
 
-# Run with file-based parallelism.
+# # File-based parallelism
+#
+# Same assimilation algorithm, but now the transition and observations are done in
+# parallel.
 worker_ids = addprocs(4; exeflags="--project=$(Base.active_project())")
 worker_ids_driver = vcat([1], worker_ids)
 try
@@ -421,7 +422,9 @@ finally
     rmprocs(worker_ids)
 end;
 
-# Now do the transition in parallel, using the same observations as the sequential code.
+# # Pmap-based parallelism.
+#
+# Similar, but only parallelizes transition operator to make it easier to read.
 worker_ids = addprocs(4; exeflags="--project=$(Base.active_project())")
 try
     @everywhere worker_ids $worker_initial_imports
@@ -518,7 +521,7 @@ finally
     rmprocs(worker_ids)
 end;
 
-# Now do it all in parallel.
+# Now parallelizes both the transition operator and the observation operator.
 worker_ids = addprocs(6; exeflags="--project=$(Base.active_project())")
 ensembles_parallel = try
     worker_pool = WorkerPool(worker_ids[3:end])
@@ -585,6 +588,8 @@ finally
     rmprocs(worker_ids)
 end;
 
+# # Error check
+#
 # Print out some info to make sure the results are the same, except the noise should be different.
 for (i, (e, ep)) in enumerate(zip(ensembles_sequential, ensembles_parallel))
     em = get_ensemble_matrix(e.ensemble)
@@ -605,9 +610,12 @@ for (i, (e, ep)) in enumerate(zip(ensembles_sequential, ensembles_parallel))
     end
 end;
 
-# Maybe clean up a little.
-try
-    Pkg.rm("Lorenz63")
-catch e
-    @warn e
-end
+# The end!
+
+#md Note that this cleanup only needs to be run in automated contexts. #hide
+#md The unregistered packages can cause issues. #hide
+try #hide
+    Pkg.rm("Lorenz63") #hide
+catch e #hide
+    @warn e #hide
+end #hide
