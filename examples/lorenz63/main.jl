@@ -1,5 +1,9 @@
 # # Lorenz63 example
-# Set up environment
+#
+# Note: The packages for this example are documented in the [Project.toml](Project.toml),
+#       except for some unregistered packages.
+#
+# First, we'll set up the environment, which entails installing and importing packages.
 
 ## Install unregistered packages.
 using Pkg: Pkg
@@ -48,29 +52,6 @@ end
 worker_initial_imports = @macroexpand1 @initial_imports
 
 include("../_utils/utils.jl");
-
-# Define how to make the initial ensemble.
-function generate_ensemble(params::Dict)
-    seed = params["ensemble"]["seed"]
-    ensemble_size = params["ensemble"]["size"]
-    prior_type = params["ensemble"]["prior"]
-
-    members = Vector{Dict{Symbol,Any}}(undef, ensemble_size)
-    if prior_type == "gaussian"
-        rng = Random.MersenneTwister(seed)
-        prior_mean, prior_std = params["ensemble"]["prior_params"]
-        for i in 1:ensemble_size
-            data = prior_mean .+ prior_std .* randn(rng, 3)
-            state = Dict{Symbol,Any}(:state => data)
-            members[i] = state
-        end
-    else
-        throw(ArgumentError("Invalid prior type: $prior_type"))
-    end
-
-    ensemble = Ensemble(members)
-    return ensemble
-end;
 
 # Define parameters.
 params = Dict(
@@ -167,7 +148,31 @@ if plot_ground_truth
     figs[1]
 end
 
+# # Ensembles
+#
 # Make initial ensemble.
+
+function generate_ensemble(params::Dict)
+    seed = params["ensemble"]["seed"]
+    ensemble_size = params["ensemble"]["size"]
+    prior_type = params["ensemble"]["prior"]
+
+    members = Vector{Dict{Symbol,Any}}(undef, ensemble_size)
+    if prior_type == "gaussian"
+        rng = Random.MersenneTwister(seed)
+        prior_mean, prior_std = params["ensemble"]["prior_params"]
+        for i in 1:ensemble_size
+            data = prior_mean .+ prior_std .* randn(rng, 3)
+            state = Dict{Symbol,Any}(:state => data)
+            members[i] = state
+        end
+    else
+        throw(ArgumentError("Invalid prior type: $prior_type"))
+    end
+
+    ensemble = Ensemble(members)
+    return ensemble
+end
 
 if !(@isdefined ensemble_initial0) || isnothing(ensemble_initial0)
     ensemble_initial0 = generate_ensemble(params)
@@ -181,6 +186,8 @@ observation_times = observation_times[1:t_index_end]
 ground_truth_observations = ground_truth.observations[1:t_index_end]
 transition_noise = params["spinup"]["transition_noise_scale"];
 
+# # Data assimilation
+#
 # Choose filtering algorithm.
 filter = get_enkf_filter(params["spinup"])
 
@@ -250,7 +257,6 @@ if !(@isdefined ensembles) || isnothing(ensembles)
 end;
 
 # Define handy functions.
-
 function get_ground_truth_iterator(ensembles_ts, observation_times)
     gt_index = 1
     gt_indices = []
@@ -493,7 +499,10 @@ if plot_initial_ensemble_mean
     figs[1]
 end
 
-# Maybe clean up a little.
+# And so everything is great!
+
+# Note that this cleanup only needs to be run in automated contexts.
+# The unregistered packages can cause issues.
 try
     Pkg.rm("Lorenz63")
     Pkg.rm("EnsembleKalmanFilters")

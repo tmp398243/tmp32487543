@@ -30,7 +30,7 @@ end
 build_examples = true
 build_notebooks = true
 build_scripts = true
-examples = ["Lorenz63 Parallel" => "lorenz63-parallel", "Lorenz63 EnKF" => "lorenz63-enkf"]
+examples = ["Lorenz63" => "lorenz63", "Parallelization" => "parallel"]
 examples_extras = ["Example utils" => "_utils/utils.jl"]
 examples_markdown = []
 examples_extras_markdown = []
@@ -38,20 +38,18 @@ examples_extras_markdown = []
 function update_header(content, pth)
     links = []
     if build_notebooks
-        push!(links, "[Jupyter notebook](main.ipynb)")
+        push!(links, "a [Jupyter notebook](main.ipynb)")
     end
     if build_scripts
-        push!(links, "[plain script](main.jl)")
+        push!(links, "a [plain script](main.jl)")
     end
     if length(links) == 0
         return content
     end
     project_link = "[Project.toml](Project.toml)"
+    links_str = join(links, ", ", "$(length(links) > 2 ? "," : "") or ")
     return """
-        # # Reproducing example
-        # The packages for this example are documented in the $project_link.
-        # # Accessing example
-        # This can also be accessed as a $(join(links, ", a", ", or a ")).
+        # **Other formats**: This can also be accessed as $(links_str).
     """ * content
 end
 
