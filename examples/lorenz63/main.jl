@@ -501,11 +501,11 @@ end
 
 # And so everything is great!
 
-# Note that this cleanup only needs to be run in automated contexts. #hide
-# The unregistered packages can cause issues. #hide
-try #hide
-    Pkg.rm("Lorenz63") #hide
-    Pkg.rm("EnsembleKalmanFilters") #hide
-catch e #hide
-    @warn e #hide
-end #hide
+# Note that this cleanup only needs to be run in automated contexts.
+# The unregistered packages can cause issues.
+try
+    Pkg.rm("Lorenz63")
+    Pkg.rm("EnsembleKalmanFilters")
+catch e
+    @warn e
+end

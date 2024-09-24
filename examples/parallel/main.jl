@@ -612,10 +612,10 @@ end;
 
 # The end!
 
-#md Note that this cleanup only needs to be run in automated contexts. #hide
-#md The unregistered packages can cause issues. #hide
-try #hide
-    Pkg.rm("Lorenz63") #hide
-catch e #hide
-    @warn e #hide
-end #hide
+# Note that this cleanup only needs to be run in automated contexts.
+# The unregistered packages can cause issues.
+try
+    Pkg.rm("Lorenz63")
+catch e
+    @warn e
+end
