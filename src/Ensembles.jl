@@ -46,6 +46,7 @@ with another.
 module Ensembles
 include("ensemble.jl")
 include("operators.jl")
+include("observers.jl")
 include("parallel.jl")
 include("parallel_file.jl")
 include("parallel_operators.jl")

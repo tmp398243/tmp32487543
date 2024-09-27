@@ -21,6 +21,12 @@ catch
     Ensembles.install(:EnsembleKalmanFilters)
 end
 
+try
+    using NormalizingFlowFilters: NormalizingFlowFilters
+catch
+    Ensembles.install(:NormalizingFlowFilters)
+end
+
 ## Define a macro for doing imports to avoid duplicating it for remote processes later on.
 macro initial_imports()
     return esc(
@@ -506,6 +512,7 @@ end
 try
     Pkg.rm("Lorenz63")
     Pkg.rm("EnsembleKalmanFilters")
+    Pkg.rm("NormalizingFlowFilters")
 catch e
     @warn e
 end
