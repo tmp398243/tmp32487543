@@ -5,7 +5,12 @@ using Ensembles:
 using NormalizingFlowFilters: NormalizingFlowFilters, NormalizingFlowFilter
 
 function Ensembles.assimilate_data(
-    filter::NormalizingFlowFilter, ensemble, ensemble_obs_clean, ensemble_obs_noisy, y_obs, log_data
+    filter::NormalizingFlowFilter,
+    ensemble,
+    ensemble_obs_clean,
+    ensemble_obs_noisy,
+    y_obs,
+    log_data,
 )
     X_matrix = NormalizingFlowFilters.assimilate_data(
         filter,

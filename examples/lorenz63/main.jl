@@ -27,7 +27,6 @@ catch
     Ensembles.install(:NormalizingFlowFilters)
 end
 
-
 ## Define a macro for doing imports to avoid duplicating it for remote processes later on.
 macro initial_imports()
     return esc(
