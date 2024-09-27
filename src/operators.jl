@@ -2,7 +2,6 @@ export AbstractOperator, AbstractNoisyOperator
 export apply_operator, apply_operator!
 export get_state_keys
 export split_clean_noisy, xor_seed!
-export KeyObserver
 
 abstract type AbstractOperator end
 abstract type AbstractNoisyOperator <: AbstractOperator end
@@ -56,17 +55,4 @@ end
 
 function split_clean_noisy(M::T, member) where {T<:AbstractNoisyOperator}
     return error("Please implement this for type $T")
-end
-
-struct KeyObserver <: AbstractOperator
-    state_keys::Any
-end
-get_state_keys(M::KeyObserver) = M.state_keys
-
-function (M::KeyObserver)(member::Dict{Symbol,Any})
-    obs = typeof(member)()
-    for key in get_state_keys(M)
-        obs[key] = deepcopy(member[key])
-    end
-    return obs
 end
