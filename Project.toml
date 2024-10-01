@@ -12,34 +12,34 @@ Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 
 [weakdeps]
 EnsembleKalmanFilters = "489b957c-0289-4703-8989-7a2007538216"
-NormalizingFlowFilters = "bdff3154-b03d-49d9-ae6e-73db1909c910"
 Lorenz63 = "72db8b11-f6a9-4618-8243-341c46e36e41"
 Lorenz96 = "3fb22c43-5981-45f6-b839-6cbd65dbe502"
+NormalizingFlowFilters = "bdff3154-b03d-49d9-ae6e-73db1909c910"
 Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 
 [extensions]
 EnsembleKalmanFiltersExt = "EnsembleKalmanFilters"
-NormalizingFlowFiltersExt = "NormalizingFlowFilters"
 Lorenz63Ext = "Lorenz63"
 Lorenz96Ext = "Lorenz96"
+NormalizingFlowFiltersExt = "NormalizingFlowFilters"
 StatisticsExt = "Statistics"
 
 [compat]
 Distributed = "1.7"
 EnsembleKalmanFilters = "1"
-JLD2 = "0.4"
+JLD2 = "0.4, 0.5"
 Lorenz63 = "0.1.0"
 Lorenz96 = "0.3.0"
+NormalizingFlowFilters = "0,1"
 PackageExtensionCompat = "1.0.2"
 Pkg = "1.7"
 Random = "1.7"
 Statistics = "1.7"
-NormalizingFlowFilters = "0,1"
 julia = "1.7"
 
 [extras]
 EnsembleKalmanFilters = "489b957c-0289-4703-8989-7a2007538216"
-NormalizingFlowFilters = "bdff3154-b03d-49d9-ae6e-73db1909c910"
 Lorenz63 = "72db8b11-f6a9-4618-8243-341c46e36e41"
 Lorenz96 = "3fb22c43-5981-45f6-b839-6cbd65dbe502"
+NormalizingFlowFilters = "bdff3154-b03d-49d9-ae6e-73db1909c910"
 Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
