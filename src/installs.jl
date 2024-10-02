@@ -6,11 +6,7 @@ _dependencies[:Lorenz63] =
 _dependencies[:EnsembleKalmanFilters] =
     () -> Pkg.add(; url="https://github.com/tmp398243/tmp45742")
 _dependencies[:NormalizingFlowFilters] =
-    () -> begin
-        # Need the latest version of InvertibleNetworks for the odd input size fix.
-        Pkg.add(; url="https://github.com/tmp398243/tmp337502")
-        Pkg.add(; url="https://github.com/slimgroup/InvertibleNetworks.jl/")
-    end
+    () -> Pkg.add(; url="https://github.com/tmp398243/tmp337502")
 
 function install(pkg::Symbol)
     if !(pkg in keys(_dependencies))
