@@ -449,7 +449,9 @@ function get_member_dict!(ensemble::Ensemble, member::Dict, data::AbstractVector
         member[key], idx = _set_vector!(member[key], data, idx)
     end
     if idx <= n
-        error("Member has $(idx-1) values but tried to assign vector of length $n > $(idx-1)")
+        error(
+            "Member has $(idx-1) values but tried to assign vector of length $n > $(idx-1)"
+        )
     end
     return member
 end
