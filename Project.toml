@@ -1,7 +1,7 @@
 name = "Ensembles"
 uuid = "6e62b0a0-f6e2-496f-914a-544f223f57d3"
 authors = ["Grant Bruer gbruer15@gmail.com and contributors"]
-version = "0.0.1"
+version = "v1.0.0"
 
 [deps]
 Distributed = "8ba89e20-285c-5b6f-9357-94700520ee1b"
@@ -35,7 +35,7 @@ PackageExtensionCompat = "1.0.2"
 Pkg = "1.7"
 Random = "1.7"
 Statistics = "1.7"
-julia = "1.7"
+julia = "1.10"
 
 [extras]
 EnsembleKalmanFilters = "489b957c-0289-4703-8989-7a2007538216"
