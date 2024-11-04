@@ -446,10 +446,10 @@ function get_member_dict!(ensemble::Ensemble, member::Dict, data::AbstractVector
     idx = 1
     n = length(data)
     for key in ensemble.state_keys
-        member[key], idx = _set_vector!(member[key], view(data, idx:n))
+        member[key], idx = _set_vector!(member[key], data, idx)
     end
-    if idx < n
-        error("Member has $idx values but tried to assign vector of length $n > $idx")
+    if idx <= n
+        error("Member has $(idx-1) values but tried to assign vector of length $n > $(idx-1)")
     end
     return member
 end
@@ -460,7 +460,7 @@ _set_vector!(a, v::AbstractVector) = _set_vector!(a, v, 1)
 _set_vector!(x::Number, v::AbstractVector, idx::Int) = v[idx], idx + 1
 
 function _set_vector!(x::AbstractArray, v::AbstractVector, idx::Int)
-    x .= v[idx:(idx + length(x) - 1)]
+    x[:] .= v[idx:(idx + length(x) - 1)]
     idx += length(x)
     return x, idx
 end
