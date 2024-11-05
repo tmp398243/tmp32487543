@@ -3,7 +3,9 @@ module StatisticsExt
 using Ensembles: Ensemble
 using Statistics: Statistics, mean, var, std
 
-function Statistics.mean(ensemble::Ensemble{K,V}; state_keys=ensemble.state_keys) where {K,V}
+function Statistics.mean(
+    ensemble::Ensemble{K,V}; state_keys=ensemble.state_keys
+) where {K,V}
     m = Dict{K,V}()
     for key in state_keys
         m[key] = mean(em[key] for em in ensemble.members)
