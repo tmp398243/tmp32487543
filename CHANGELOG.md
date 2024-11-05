@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v1.1.0] - 2024-11-05
+
+### Added
+
+- Extension for `Statistics.std`
+
+### Changed
+
+- Extensions for `Statistics.mean` and `Statistics.var` accept a `state_keys` kwarg.
+
 ## [v1.0.0] - 2024-11-04
 
 ### Added
