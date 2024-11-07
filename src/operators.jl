@@ -42,14 +42,13 @@ split_clean_noisy(M::AbstractOperator, ensemble_obs::AbstractEnsemble) = ensembl
 
 function split_clean_noisy(M::AbstractNoisyOperator, ensemble_obs::AbstractEnsemble)
     N = get_ensemble_size(ensemble_obs)
-    op = get_underlying_operator(M)
     members_clean = Vector{eltype(ensemble_obs.members)}(undef, N)
     members_noisy = Vector{eltype(ensemble_obs.members)}(undef, N)
     for i in 1:N
         members_clean[i], members_noisy[i] = split_clean_noisy(M, ensemble_obs.members[i])
     end
-    ensemble_clean = Ensemble(ensemble_obs, members_clean, get_state_keys(op))
-    ensemble_noisy = Ensemble(ensemble_obs, members_noisy, get_state_keys(op))
+    ensemble_clean = Ensemble(ensemble_obs, members_clean)
+    ensemble_noisy = Ensemble(ensemble_obs, members_noisy)
     return ensemble_clean, ensemble_noisy
 end
 

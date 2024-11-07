@@ -56,7 +56,7 @@ function (M::NoisyObserver)(member::Dict{Symbol,Any}, args...)
     return obs
 end
 
-function split_clean_noisy(M::NoisyObserver, obs::Dict{Symbol,Any})
+function split_clean_noisy(M::NoisyObserver, obs::Dict{Symbol,<:Any})
     obs_clean = typeof(obs)()
     obs_noisy = typeof(obs)()
     for key in get_state_keys(M.op)
