@@ -26,7 +26,7 @@ StatisticsExt = "Statistics"
 
 [compat]
 Distributed = "1.7"
-EnsembleKalmanFilters = "1"
+EnsembleKalmanFilters = "0.0.1"
 JLD2 = "0.4, 0.5"
 Lorenz63 = "0.1.0"
 Lorenz96 = "0.3.0"
