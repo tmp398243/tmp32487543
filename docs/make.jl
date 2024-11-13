@@ -134,13 +134,13 @@ makedocs(;
     source=DOC_STAGE,
     build=DOC_BUILD,
     format=Documenter.HTML(;
-        repolink="https://github.com/tmp398243/tmp32487543",
-        canonical="https://tmp398243.github.io/tmp32487543",
+        repolink="https://github.com/DataAssimilation/Ensembles.jl",
+        canonical="https://DataAssimilation.github.io/Ensembles.jl",
         edit_link="main",
         assets=String[],
         size_threshold=2 * 2^20,
     ),
-    repo="github.com/tmp398243/tmp32487543",
+    repo="github.com/DataAssimilation/Ensembles.jl",
     pages=[
         "Home" => "index.md",
         "Examples" => examples_markdown,

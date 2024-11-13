@@ -3,21 +3,21 @@
 |  |     |
 |--|:---:|
 | [**Documentation**][docs-latest-url]    | [<img src="https://img.shields.io/badge/docs-latest-blue.svg" alt = "doc badge" height="30">][docs-latest-url] |
-| [**CI tests**][checks-url]        | [<img src="https://github.com/tmp398243/tmp32487543/actions/workflows/checks.yaml/badge.svg?branch=main" alt = "CI badge" height="30">][checks-url] |
-| [**Code Coverage**][codecov-url]    | [<img src="https://tmp398243.github.io/tmp32487543/coverage/badge.svg" alt = "coverage badge" height="30">][codecov-url] |
+| [**CI tests**][checks-url]        | [<img src="https://github.com/DataAssimilation/Ensembles.jl/actions/workflows/checks.yaml/badge.svg?branch=main" alt = "CI badge" height="30">][checks-url] |
+| [**Code Coverage**][codecov-url]    | [<img src="https://DataAssimilation.github.io/Ensembles.jl/coverage/badge.svg" alt = "coverage badge" height="30">][codecov-url] |
 
-[docs-latest-url]: https://tmp398243.github.io/tmp32487543
-[checks-url]: https://github.com/tmp398243/tmp32487543/actions/workflows/checks.yaml?query=branch%3Amain
-[docs-build-url]: https://github.com/tmp398243/tmp32487543/actions/workflows/docs.yaml?query=branch%3Amain
-[codecov-url]: https://tmp398243.github.io/tmp32487543/coverage/
+[docs-latest-url]: https://DataAssimilation.github.io/Ensembles.jl
+[checks-url]: https://github.com/DataAssimilation/Ensembles.jl/actions/workflows/checks.yaml?query=branch%3Amain
+[docs-build-url]: https://github.com/DataAssimilation/Ensembles.jl/actions/workflows/docs.yaml?query=branch%3Amain
+[codecov-url]: https://DataAssimilation.github.io/Ensembles.jl/coverage/
 
-This package exists as a template for quickly getting a Julia package set up with continuous integration and documentation support. If you have suggestions for making this better, you are very welcome to make an issue or pull request to discuss it.
+This package defines an interface for working with ensembles in the context of ensemble-based data assimilation.
 
 ## Repository Structure[^1]
 
 This repository follows a standard Julia project structure:
 
-- `src/`: Contains the main source code for the project with the entrypoint being `src/Ensembles.jl`.
+- `src/`: Contains the main source code for the project with the entrypoint being `src/tmp32487543`.
 - `test/`: Includes test files for the project with the entrypoint being `test/runtests.jl`.
 - `docs/`: Houses documentation files.
 - `ci_scripts/`: Contains scripts used for continuous integration.

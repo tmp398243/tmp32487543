@@ -4,7 +4,7 @@ CurrentModule = Ensembles
 
 # Ensembles
 
-Documentation for [Ensembles](https://github.com/tmp398243/tmp32487543).
+Documentation for [Ensembles](https://github.com/DataAssimilation/Ensembles.jl).
 
 
 ```@index
