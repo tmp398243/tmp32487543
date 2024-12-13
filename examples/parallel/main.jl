@@ -220,8 +220,8 @@ end
 #
 # Same assimilation algorithm, but now the transition and observations are done in
 # parallel.
-# worker_ids = addprocs(4; exeflags="--project=$(Base.active_project())")
-# worker_ids_driver = vcat([1], worker_ids)
+worker_ids = addprocs(4; exeflags="--project=$(Base.active_project())")
+worker_ids_driver = vcat([1], worker_ids)
 # try
     @everywhere worker_ids_driver begin
         println("I am here")
@@ -302,35 +302,35 @@ end
         for (k, (t, y_obs)) in
             enumerate(zip(observation_times, ground_truth.observations))
             ## Advance ensemble to time t.
-            worker_tasks = []
-            for (i, p) in enumerate(worker_ids)
-                task = remotecall(
-                    Main.worker_transition,
-                    p,
-                    run_dir,
-                    k,
-                    t0,
-                    t,
-                    params,
-                    i,
-                    length(worker_ids),
-                )
-                push!(worker_tasks, task)
-            end
-
-            for task in worker_tasks
-                v = fetch(task)
-                isa(v, Exception) && throw(v)
-            end
-
-            # Dagger.@sync begin
-            #     for (i, p) in enumerate(worker_ids)
-            #         j = Dagger.@shard myid()
-            #         Dagger.@spawn scope=Dagger.scope(worker=p) begin
-            #             Main.worker_transition(run_dir, k, t0, t, params, i, length(worker_ids))
-            #         end
-            #     end
+            # worker_tasks = []
+            # for (i, p) in enumerate(worker_ids)
+            #     task = remotecall(
+            #         Main.worker_transition,
+            #         p,
+            #         run_dir,
+            #         k,
+            #         t0,
+            #         t,
+            #         params,
+            #         i,
+            #         length(worker_ids),
+            #     )
+            #     push!(worker_tasks, task)
             # end
+
+            # for task in worker_tasks
+            #     v = fetch(task)
+            #     isa(v, Exception) && throw(v)
+            # end
+
+            Dagger.@sync begin
+                for (i, p) in enumerate(worker_ids)
+                    j = Dagger.@shard myid()
+                    Dagger.@spawn scope=Dagger.scope(worker=p) begin
+                        Main.worker_transition(run_dir, k, t0, t, params, i, length(worker_ids))
+                    end
+                end
+            end
 
             Main.worker_transition(run_dir, k, t0, t, params, 1, 1)
             output_filepath = joinpath(run_dir, "ensemble_$(k)_prior")
