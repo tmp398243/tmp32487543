@@ -14,7 +14,7 @@ function assimilate_data end
 function assimilate_data(
     filter::Nothing,
     prior_state::AbstractEnsemble,
-    prior_obs::Union{AbstractEnsemble, Nothing},
+    prior_obs::Union{AbstractEnsemble,Nothing},
     y_obs,
     log_data=nothing,
 )
@@ -51,8 +51,8 @@ julia> @test prior.members == posterior2.members;
 function assimilate_data(
     filter::Nothing,
     prior_state::AbstractEnsemble,
-    prior_obs_clean::Union{AbstractEnsemble, Nothing},
-    prior_obs_noisy::Union{AbstractEnsemble, Nothing},
+    prior_obs_clean::Union{AbstractEnsemble,Nothing},
+    prior_obs_noisy::Union{AbstractEnsemble,Nothing},
     y_obs,
     log_data=nothing,
 )
