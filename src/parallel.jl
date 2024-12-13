@@ -6,13 +6,26 @@ export divvy_among_workers
 abstract type AbstractParallelStrategy end
 abstract type AbstractParallelWorker end
 
+"""Unstable interface"""
 function run_partial_operator end
 
+"""Unstable interface"""
 struct ParallelWorker <: AbstractParallelWorker
     num_workers::Any
     worker_id::Any
 end
 
+"""
+    divvy_among_workers(N, worker_id, num_workers)
+
+Statically partition the `N` jobs among `num_workers` workers and return the job range for
+this worker.
+
+Given a number of jobs `N`, a number of workers `num_workers, and a particular worker's id
+`worker_id` in the range 1 to `num_workers`, the job's are partitioned such that every
+worker has `floor(N / num_workers)` jobs, except `N % num_workers` will have one extra
+job.
+"""
 function divvy_among_workers(N, worker_id, num_workers)
     base_work, extra_work = divrem(N, num_workers)
 

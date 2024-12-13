@@ -12,9 +12,25 @@ struct NoisyObserver{O<:AbstractOperator} <: AbstractNoisyOperator
 end
 
 get_state_keys(M::NoisyObserver) = M.state_keys
-get_underlying_operator(M::NoisyObserver) = M.op
 xor_seed!(M::NoisyObserver, seed_mod::UInt) = Random.seed!(M.rng, xor(M.seed, seed_mod))
 
+"""
+    NoisyObserver(op::AbstractOperator; only_noisy=nothing, params)
+
+Create a noisy version of `op` that runs `op` and then adds noise.
+
+If `only_noisy` is `false`, the state keys returned by `op` are augmented with `_noisy` for
+the noisy versions, with the original state keys representing the clean versions.
+
+# Params
+`params` is a dictionary.
+
+- `params["observation"]["noise_scale"]`: standard deviation of noise.
+- `params["observation"]["seed"]`: seed for random number generator. Defaults to 0.
+- `params["observation"]["rng"]`: random number generator object. Defaults to `Random.MersenneTwister(seed)`.
+- `params["observation"]["only_noisy"]`: if true, operator returns only the noisy data
+  instead of both noisy and clean. Defaults to false. Overrided by keyword argument `only_noisy`.
+"""
 function NoisyObserver(op::AbstractOperator; only_noisy=nothing, params)
     noise_scale = params["observation"]["noise_scale"]
     seed = get(params["observation"], "seed", 0)
@@ -36,6 +52,11 @@ function NoisyObserver(op::AbstractOperator; only_noisy=nothing, params)
     return NoisyObserver(op, state_keys, noise_scale, rng, seed, only_noisy)
 end
 
+"""
+    NoisyObserver(state_keys; params)
+
+Create a noisy operator that observes the given state keys.
+"""
 NoisyObserver(state_keys; params) = NoisyObserver(KeyObserver(state_keys); params)
 
 function (M::NoisyObserver)(member::Dict{Symbol,Any}, args...)

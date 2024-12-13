@@ -26,6 +26,7 @@ struct DistributedOperator{T<:AbstractOperator,W<:AbstractWorkerPool,K<:Abstract
     distributed_type::Val{D}
 end
 
+"""Unstable interface"""
 function DistributedOperator(
     op::T,
     worker_pool::W=default_worker_pool(),
@@ -110,6 +111,7 @@ function split_clean_noisy(
 ) where {T<:AbstractNoisyOperator,W,K,D}
     return split_clean_noisy(M.op, ensemble_obs)
 end
+
 function xor_seed!(
     M::DistributedOperator{T,W,K,D}, seed_mod::UInt
 ) where {T<:AbstractNoisyOperator,W,K,D}
