@@ -22,21 +22,11 @@ ts = @testset ReportingTestSet "" begin
             :(using Ensembles, Test);
             recursive=true,
         )
-
-        # Ensembles.install(:Lorenz96)
-        # using Lorenz96
-        # DocMeta.setdocmeta!(
-        #     Ensembles.get_extension(Ensembles, :Lorenz96Ext),
-        #     :DocTestSetup,
-        #     :(using Ensembles, Test);
-        #     recursive=true,
-        # )
     end
 
     doctest(Ensembles; manual=true)
     if Ensembles.HAS_NATIVE_EXTENSIONS
         doctest(Ensembles.get_extension(Ensembles, :Lorenz63Ext); manual=true)
-        # doctest(Ensembles.get_extension(Ensembles, :Lorenz96Ext); manual=true)
     end
 
     # Run examples.

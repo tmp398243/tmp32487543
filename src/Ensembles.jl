@@ -30,7 +30,8 @@ X^k_{new} &= \text{assimilate}(X^k, Y^k, y^*_0).
 
 Computing ``X^k`` from ``X^{k-1}`` and computing ``Y^k`` from ``X^k`` can trivially be
 decomposed into ``N`` independent computations, making parallelization trivial. The
-`assimilate` step uses all the ensemble members and can be one of many algorithms.
+`assimilate` step uses all the ensemble members and can be one of many algorithms,
+such as the ensemble Kalman filter.
 
 This package provides an interface for working with this problem.
 

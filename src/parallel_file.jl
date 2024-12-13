@@ -3,11 +3,13 @@ using JLD2: jldsave, load
 
 export FileBasedPartial
 
+"""Unstable interface"""
 struct FileBasedPartial <: AbstractParallelStrategy
     target_path::Any
     work_path::Any
 end
 
+"""Unstable interface"""
 function run_partial_operator(
     strat::FileBasedPartial,
     worker::ParallelWorker,
